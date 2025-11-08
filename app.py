@@ -19,73 +19,68 @@ st.title("🛍️ Shopping Behavior Dashboard")
 # 📊 Sidebar filters
 st.sidebar.header("🔍 Фільтри")
 
+# 🔘 Reset filters
+if "reset" not in st.session_state:
+    st.session_state.reset = False
+
+if st.sidebar.button("🔄 Очистити всі фільтри"):
+    st.session_state.reset = True
+
 # Age
-age_range = st.sidebar.slider("Вік", int(df["Age"].min()), int(df["Age"].max()), (25, 45))
-
-# Gender
-gender = st.sidebar.multiselect("Стать", df["Gender"].unique())
-
-# Item Purchased
-item = st.sidebar.multiselect("Придбаний товар", df["Item Purchased"].unique())
-
-# Category
-category = st.sidebar.multiselect("Категорія", df["Category"].unique())
-
-# Location
-location = st.sidebar.multiselect("Штат", df["Location"].unique())
-
-# Size
-size = st.sidebar.multiselect("Розмір", df["Size"].unique())
-
-# Color
-color = st.sidebar.multiselect("Колір", df["Color"].unique())
-
-# Season
-season = st.sidebar.multiselect("Сезон", df["Season"].unique())
+age_min, age_max = int(df["Age"].min()), int(df["Age"].max())
+if st.session_state.reset:
+    age_range = (age_min, age_max)
+else:
+    age_range = st.sidebar.slider("Вік", age_min, age_max, (age_min, age_max))
 
 # Review Rating
-rating_range = st.sidebar.slider("Рейтинг відгуку", float(df["Review Rating"].min()), float(df["Review Rating"].max()), (3.0, 5.0))
+rating_min, rating_max = float(df["Review Rating"].min()), float(df["Review Rating"].max())
+if st.session_state.reset:
+    rating_range = (rating_min, rating_max)
+else:
+    rating_range = st.sidebar.slider("Рейтинг відгуку", rating_min, rating_max, (rating_min, rating_max))
 
-# Subscription Status
-subscription = st.sidebar.radio("Підписка", df["Subscription Status"].unique())
+# Multiselect filters with default=all
+def multi_filter(label, column):
+    options = df[column].dropna().unique().tolist()
+    default = options if st.session_state.reset else options
+    return st.sidebar.multiselect(label, options=options, default=default)
 
-# Shipping Type
-shipping = st.sidebar.multiselect("Тип доставки", df["Shipping Type"].unique())
-
-# Discount Applied
-discount = st.sidebar.radio("Знижка застосована", df["Discount Applied"].unique())
-
-# Promo Code Used
-promo = st.sidebar.radio("Промокод використано", df["Promo Code Used"].unique())
-
-# Payment Method
-payment = st.sidebar.multiselect("Спосіб оплати", df["Payment Method"].unique())
-
-# Frequency of Purchases
-frequency = st.sidebar.multiselect("Частота покупок", df["Frequency of Purchases"].unique())
+gender = multi_filter("Стать", "Gender")
+item = multi_filter("Придбаний товар", "Item Purchased")
+category = multi_filter("Категорія", "Category")
+location = multi_filter("Штат", "Location")
+size = multi_filter("Розмір", "Size")
+color = multi_filter("Колір", "Color")
+season = multi_filter("Сезон", "Season")
+subscription = multi_filter("Підписка", "Subscription Status")
+shipping = multi_filter("Тип доставки", "Shipping Type")
+discount = multi_filter("Знижка застосована", "Discount Applied")
+promo = multi_filter("Промокод використано", "Promo Code Used")
+payment = multi_filter("Спосіб оплати", "Payment Method")
+frequency = multi_filter("Частота покупок", "Frequency of Purchases")
 
 # 🔄 Apply filters
 filtered_df = df.copy()
 filtered_df = filtered_df[(filtered_df["Age"] >= age_range[0]) & (filtered_df["Age"] <= age_range[1])]
-if gender: filtered_df = filtered_df[filtered_df["Gender"].isin(gender)]
-if item: filtered_df = filtered_df[filtered_df["Item Purchased"].isin(item)]
-if category: filtered_df = filtered_df[filtered_df["Category"].isin(category)]
-if location: filtered_df = filtered_df[filtered_df["Location"].isin(location)]
-if size: filtered_df = filtered_df[filtered_df["Size"].isin(size)]
-if color: filtered_df = filtered_df[filtered_df["Color"].isin(color)]
-if season: filtered_df = filtered_df[filtered_df["Season"].isin(season)]
 filtered_df = filtered_df[(filtered_df["Review Rating"] >= rating_range[0]) & (filtered_df["Review Rating"] <= rating_range[1])]
-if subscription: filtered_df = filtered_df[filtered_df["Subscription Status"] == subscription]
-if shipping: filtered_df = filtered_df[filtered_df["Shipping Type"].isin(shipping)]
-if discount: filtered_df = filtered_df[filtered_df["Discount Applied"] == discount]
-if promo: filtered_df = filtered_df[filtered_df["Promo Code Used"] == promo]
-if payment: filtered_df = filtered_df[filtered_df["Payment Method"].isin(payment)]
-if frequency: filtered_df = filtered_df[filtered_df["Frequency of Purchases"].isin(frequency)]
+filtered_df = filtered_df[filtered_df["Gender"].isin(gender)]
+filtered_df = filtered_df[filtered_df["Item Purchased"].isin(item)]
+filtered_df = filtered_df[filtered_df["Category"].isin(category)]
+filtered_df = filtered_df[filtered_df["Location"].isin(location)]
+filtered_df = filtered_df[filtered_df["Size"].isin(size)]
+filtered_df = filtered_df[filtered_df["Color"].isin(color)]
+filtered_df = filtered_df[filtered_df["Season"].isin(season)]
+filtered_df = filtered_df[filtered_df["Subscription Status"].isin(subscription)]
+filtered_df = filtered_df[filtered_df["Shipping Type"].isin(shipping)]
+filtered_df = filtered_df[filtered_df["Discount Applied"].isin(discount)]
+filtered_df = filtered_df[filtered_df["Promo Code Used"].isin(promo)]
+filtered_df = filtered_df[filtered_df["Payment Method"].isin(payment)]
+filtered_df = filtered_df[filtered_df["Frequency of Purchases"].isin(frequency)]
 
 # 🛒 Покупки по категоріях
 st.subheader("🛒 Покупки по категоріях")
-if "Category" in filtered_df.columns:
-    st.bar_chart(filtered_df["Category"].value_counts())
+st.bar_chart(filtered_df["Category"].value_counts())
 
 # 👥 Розподіл статі
 st.subheader("👥 Розподіл статі")
@@ -123,31 +118,30 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
 
 # 🗺️ Сума покупок по штатах США
 st.subheader("🗺️ Сума покупок по штатах США")
-if "Location" in filtered_df.columns and "Purchase Amount (USD)" in filtered_df.columns:
-    state_name_to_code = {
-        "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
-        "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
-        "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
-        "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
-        "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS", "Missouri": "MO",
-        "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH", "New Jersey": "NJ",
-        "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH",
-        "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
-        "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT",
-        "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
-    }
-    location_sum = filtered_df.groupby("Location")["Purchase Amount (USD)"].sum().reset_index()
-    location_sum.columns = ["StateName", "Total Purchase"]
-    location_sum["State"] = location_sum["StateName"].map(state_name_to_code)
-    location_sum = location_sum.dropna(subset=["State"])
-    fig_map = px.choropleth(
-        location_sum,
-        locations="State",
-        locationmode="USA-states",
-        color="Total Purchase",
-        scope="usa",
-        color_continuous_scale="YlOrRd",
-        labels={"Total Purchase": "Сума покупок ($)"},
-        title="Сума покупок по штатах США"
-    )
-    st.plotly_chart(fig_map, use_container_width=True)
+state_name_to_code = {
+    "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
+    "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
+    "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
+    "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
+    "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS", "Missouri": "MO",
+    "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH", "New Jersey": "NJ",
+    "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH",
+    "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
+    "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT",
+    "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
+}
+location_sum = filtered_df.groupby("Location")["Purchase Amount (USD)"].sum().reset_index()
+location_sum.columns = ["StateName", "Total Purchase"]
+location_sum["State"] = location_sum["StateName"].map(state_name_to_code)
+location_sum = location_sum.dropna(subset=["State"])
+fig_map = px.choropleth(
+    location_sum,
+    locations="State",
+    locationmode="USA-states",
+    color="Total Purchase",
+    scope="usa",
+    color_continuous_scale="YlOrRd",
+    labels={"Total Purchase": "Сума покупок ($)"},
+    title="Сума покупок по штатах США"
+)
+st.plotly_chart(fig_map, use_container_width=True)
