@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import plotly.graph_objects as go
 
 st.set_page_config(page_title="🛍️ Shopping Behavior Dashboard", layout="wide")
 
@@ -46,13 +47,11 @@ if not numeric_cols.empty:
     sns.heatmap(numeric_cols.corr(), annot=True, cmap="coolwarm", ax=ax2)
     st.pyplot(fig2)
 
-# 🎨 Color distribution
 st.subheader("🎨 Популярність кольорів")
 if "Color" in filtered_df.columns:
     color_counts = filtered_df["Color"].value_counts()
     st.bar_chart(color_counts)
 
-# 🌤️ Season distribution
 st.subheader("🌤️ Сезонні покупки")
 if "Season" in filtered_df.columns:
     season_counts = filtered_df["Season"].value_counts()
@@ -61,7 +60,6 @@ if "Season" in filtered_df.columns:
     ax3.axis("equal")
     st.pyplot(fig3)
 
-# 🧭 Radar Chart: середня сума покупки по категоріях для кожної статі
 st.subheader("🧭 Порівняння покупок по категоріях (Radar Chart)")
 if "Purchase Amount (USD)" in filtered_df.columns and "Category" in filtered_df.columns:
     radar_data = filtered_df.groupby(["Gender", "Category"])["Purchase Amount (USD)"].mean().unstack(fill_value=0)
@@ -70,15 +68,52 @@ if "Purchase Amount (USD)" in filtered_df.columns and "Category" in filtered_df.
     angles += angles[:1]
 
     fig4, ax4 = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
-
-    for gender in radar_data.index:
-        values = radar_data.loc[gender].tolist()
+    for g in radar_data.index:
+        values = radar_data.loc[g].tolist()
         values += values[:1]
-        ax4.plot(angles, values, label=gender)
+        ax4.plot(angles, values, label=g)
         ax4.fill(angles, values, alpha=0.1)
-
     ax4.set_xticks(angles[:-1])
     ax4.set_xticklabels(categories)
     ax4.set_title("Середня сума покупки по категоріях")
     ax4.legend(loc="upper right")
     st.pyplot(fig4)
+
+# 🔀 Sankey Diagram: Gender → Category → Season
+st.subheader("🔀 Потік покупок: Gender → Category → Season")
+if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
+    sankey_df = filtered_df.groupby(["Gender", "Category", "Season"]).size().reset_index(name="count")
+
+    all_labels = pd.concat([
+        sankey_df["Gender"],
+        sankey_df["Category"],
+        sankey_df["Season"]
+    ]).unique().tolist()
+
+    label_to_index = {label: i for i, label in enumerate(all_labels)}
+
+    source = sankey_df["Gender"].map(label_to_index)
+    target = sankey_df["Category"].map(label_to_index)
+    value = sankey_df["count"]
+
+    # Second layer: Category → Season
+    source2 = sankey_df["Category"].map(label_to_index)
+    target2 = sankey_df["Season"].map(label_to_index)
+    value2 = sankey_df["count"]
+
+    fig5 = go.Figure(data=[go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=all_labels
+        ),
+        link=dict(
+            source=source.tolist() + source2.tolist(),
+            target=target.tolist() + target2.tolist(),
+            value=value.tolist() + value2.tolist()
+        )
+    )])
+
+    fig5.update_layout(title_text="Sankey Diagram: Gender → Category → Season", font_size=12)
+    st.plotly_chart(fig5, use_container_width=True)
