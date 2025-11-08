@@ -106,3 +106,12 @@ if "Discount Applied" in filtered_df.columns and "Purchase Amount (USD)" in filt
     sns.barplot(data=discount_data, x="Discount Applied", y="Purchase Amount (USD)", palette="viridis", ax=ax5)
     ax5.set_title("Середня сума покупки залежно від знижки")
     st.pyplot(fig5)
+
+# 💳 Payment Method vs Frequency of Purchases
+st.subheader("💳 Спосіб оплати vs Частота покупок")
+if "Payment Method" in filtered_df.columns and "Frequency of Purchases" in filtered_df.columns:
+    payment_data = filtered_df.groupby("Payment Method")["Frequency of Purchases"].mean().reset_index()
+    fig6, ax6 = plt.subplots()
+    sns.barplot(data=payment_data, x="Payment Method", y="Frequency of Purchases", palette="magma", ax=ax6)
+    ax6.set_title("Середня частота покупок по способу оплати")
+    st.pyplot(fig6)
