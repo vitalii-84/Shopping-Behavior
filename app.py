@@ -134,4 +134,14 @@ location_sum = filtered_df.groupby("Location")["Purchase Amount (USD)"].sum().re
 location_sum.columns = ["StateName", "Total Purchase"]
 location_sum["State"] = location_sum["StateName"].map(state_name_to_code)
 location_sum = location_sum.dropna(subset=["State"])
-fig_map = px.ch
+fig_map = px.choropleth(
+    location_sum,
+    locations="State",
+    locationmode="USA-states",
+    color="Total Purchase",
+    scope="usa",
+    color_continuous_scale="YlOrRd",  # 🔧 світло-жовтий → червоний
+    labels={"Total Purchase": "Сума покупок ($)"},
+    title="Сума покупок по штатах США"
+)
+
