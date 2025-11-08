@@ -44,9 +44,3 @@ if not numeric_cols.empty:
     fig2, ax2 = plt.subplots()
     sns.heatmap(numeric_cols.corr(), annot=True, cmap="coolwarm", ax=ax2)
     st.pyplot(fig2)
-
-st.subheader("📍 Вік vs Сума покупки")
-if "Purchase Amount (USD)" in filtered_df.columns:
-    fig3, ax3 = plt.subplots()
-    sns.scatterplot(data=filtered_df, x="Age", y="Purchase Amount (USD)", hue="Gender", ax=ax3)
-    st.pyplot(fig3)
