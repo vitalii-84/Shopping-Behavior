@@ -84,10 +84,13 @@ st.bar_chart(filtered_df["Category"].value_counts())
 
 # 👥 Розподіл статі
 st.subheader("👥 Розподіл статі")
-fig1, ax1 = plt.subplots(figsize=(6, 6))  # 👈 регулювання розміру
+fig1, ax1 = plt.subplots(figsize=(8, 4))  # 👈 ширина екрана
 ax1.pie(filtered_df["Gender"].value_counts(), labels=filtered_df["Gender"].value_counts().index, autopct="%1.1f%%", startangle=90)
 ax1.axis("equal")
+fig1.tight_layout()  # 👈 адаптація до контейнера
 st.pyplot(fig1)
+
+
 
 # 📊 Кореляція між числовими змінними
 st.subheader("📊 Кореляція між числовими змінними")
