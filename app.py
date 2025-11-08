@@ -140,8 +140,8 @@ fig_map = px.choropleth(
     locationmode="USA-states",
     color="Total Purchase",
     scope="usa",
-    color_continuous_scale="YlOrRd",  # 🔧 світло-жовтий → червоний
+    color_continuous_scale="YlOrRd",
     labels={"Total Purchase": "Сума покупок ($)"},
     title="Сума покупок по штатах США"
 )
-
+st.plotly_chart(fig_map, use_container_width=True)
