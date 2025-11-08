@@ -16,25 +16,81 @@ df = load_data()
 
 st.title("🛍️ Shopping Behavior Dashboard")
 
-# Sidebar filters
+# 📊 Sidebar filters
 st.sidebar.header("🔍 Фільтри")
-gender = st.sidebar.multiselect("Стать", options=df["Gender"].unique(), default=df["Gender"].unique())
+
+# Age
 age_range = st.sidebar.slider("Вік", int(df["Age"].min()), int(df["Age"].max()), (25, 45))
 
-filtered_df = df[df["Gender"].isin(gender)]
+# Gender
+gender = st.sidebar.multiselect("Стать", df["Gender"].unique())
+
+# Item Purchased
+item = st.sidebar.multiselect("Придбаний товар", df["Item Purchased"].unique())
+
+# Category
+category = st.sidebar.multiselect("Категорія", df["Category"].unique())
+
+# Location
+location = st.sidebar.multiselect("Штат", df["Location"].unique())
+
+# Size
+size = st.sidebar.multiselect("Розмір", df["Size"].unique())
+
+# Color
+color = st.sidebar.multiselect("Колір", df["Color"].unique())
+
+# Season
+season = st.sidebar.multiselect("Сезон", df["Season"].unique())
+
+# Review Rating
+rating_range = st.sidebar.slider("Рейтинг відгуку", float(df["Review Rating"].min()), float(df["Review Rating"].max()), (3.0, 5.0))
+
+# Subscription Status
+subscription = st.sidebar.radio("Підписка", df["Subscription Status"].unique())
+
+# Shipping Type
+shipping = st.sidebar.multiselect("Тип доставки", df["Shipping Type"].unique())
+
+# Discount Applied
+discount = st.sidebar.radio("Знижка застосована", df["Discount Applied"].unique())
+
+# Promo Code Used
+promo = st.sidebar.radio("Промокод використано", df["Promo Code Used"].unique())
+
+# Payment Method
+payment = st.sidebar.multiselect("Спосіб оплати", df["Payment Method"].unique())
+
+# Frequency of Purchases
+frequency = st.sidebar.multiselect("Частота покупок", df["Frequency of Purchases"].unique())
+
+# 🔄 Apply filters
+filtered_df = df.copy()
 filtered_df = filtered_df[(filtered_df["Age"] >= age_range[0]) & (filtered_df["Age"] <= age_range[1])]
+if gender: filtered_df = filtered_df[filtered_df["Gender"].isin(gender)]
+if item: filtered_df = filtered_df[filtered_df["Item Purchased"].isin(item)]
+if category: filtered_df = filtered_df[filtered_df["Category"].isin(category)]
+if location: filtered_df = filtered_df[filtered_df["Location"].isin(location)]
+if size: filtered_df = filtered_df[filtered_df["Size"].isin(size)]
+if color: filtered_df = filtered_df[filtered_df["Color"].isin(color)]
+if season: filtered_df = filtered_df[filtered_df["Season"].isin(season)]
+filtered_df = filtered_df[(filtered_df["Review Rating"] >= rating_range[0]) & (filtered_df["Review Rating"] <= rating_range[1])]
+if subscription: filtered_df = filtered_df[filtered_df["Subscription Status"] == subscription]
+if shipping: filtered_df = filtered_df[filtered_df["Shipping Type"].isin(shipping)]
+if discount: filtered_df = filtered_df[filtered_df["Discount Applied"] == discount]
+if promo: filtered_df = filtered_df[filtered_df["Promo Code Used"] == promo]
+if payment: filtered_df = filtered_df[filtered_df["Payment Method"].isin(payment)]
+if frequency: filtered_df = filtered_df[filtered_df["Frequency of Purchases"].isin(frequency)]
 
 # 🛒 Покупки по категоріях
 st.subheader("🛒 Покупки по категоріях")
 if "Category" in filtered_df.columns:
-    category_counts = filtered_df["Category"].value_counts()
-    st.bar_chart(category_counts)
+    st.bar_chart(filtered_df["Category"].value_counts())
 
 # 👥 Розподіл статі
 st.subheader("👥 Розподіл статі")
-gender_counts = filtered_df["Gender"].value_counts()
 fig1, ax1 = plt.subplots()
-ax1.pie(gender_counts, labels=gender_counts.index, autopct="%1.1f%%", startangle=90)
+ax1.pie(filtered_df["Gender"].value_counts(), labels=filtered_df["Gender"].value_counts().index, autopct="%1.1f%%", startangle=90)
 ax1.axis("equal")
 st.pyplot(fig1)
 
@@ -45,21 +101,6 @@ if not numeric_cols.empty:
     fig2, ax2 = plt.subplots()
     sns.heatmap(numeric_cols.corr(), annot=True, cmap="coolwarm", ax=ax2)
     st.pyplot(fig2)
-
-# 🎨 Популярність кольорів
-st.subheader("🎨 Популярність кольорів")
-if "Color" in filtered_df.columns:
-    color_counts = filtered_df["Color"].value_counts()
-    st.bar_chart(color_counts)
-
-# 🌤️ Сезонні покупки
-st.subheader("🌤️ Сезонні покупки")
-if "Season" in filtered_df.columns:
-    season_counts = filtered_df["Season"].value_counts()
-    fig3, ax3 = plt.subplots()
-    ax3.pie(season_counts, labels=season_counts.index, autopct="%1.1f%%", startangle=90)
-    ax3.axis("equal")
-    st.pyplot(fig3)
 
 # 🔀 Sankey Diagram: Gender → Category → Season
 st.subheader("🔀 Потік покупок: Gender → Category → Season")
@@ -73,45 +114,16 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     source2 = sankey_df["Category"].map(label_to_index)
     target2 = sankey_df["Season"].map(label_to_index)
     value2 = sankey_df["count"]
-    fig4 = go.Figure(data=[go.Sankey(
+    fig3 = go.Figure(data=[go.Sankey(
         node=dict(pad=15, thickness=20, line=dict(color="black", width=0.5), label=all_labels),
         link=dict(source=source.tolist() + source2.tolist(), target=target.tolist() + target2.tolist(), value=value.tolist() + value2.tolist())
     )])
-    fig4.update_layout(title_text="Sankey Diagram: Gender → Category → Season", font_size=12)
-    st.plotly_chart(fig4, use_container_width=True)
-
-# 💸 Discount vs Purchase Amount
-st.subheader("💸 Знижка vs Сума покупки")
-if "Discount Applied" in filtered_df.columns and "Purchase Amount (USD)" in filtered_df.columns:
-    discount_data = filtered_df.groupby("Discount Applied")["Purchase Amount (USD)"].mean().reset_index()
-    fig5, ax5 = plt.subplots()
-    sns.barplot(data=discount_data, x="Discount Applied", y="Purchase Amount (USD)", palette="viridis", ax=ax5)
-    ax5.set_title("Середня сума покупки залежно від знижки")
-    st.pyplot(fig5)
-
-# 🔷 Hexbin: Payment Method vs Frequency of Purchases
-st.subheader("🔷 Hexbin: Payment Method vs Frequency of Purchases")
-if "Payment Method" in filtered_df.columns and "Frequency of Purchases" in filtered_df.columns:
-    payment_map = {v: i for i, v in enumerate(filtered_df["Payment Method"].unique())}
-    freq_map = {v: i for i, v in enumerate(filtered_df["Frequency of Purchases"].unique())}
-    filtered_df["Payment Index"] = filtered_df["Payment Method"].map(payment_map)
-    filtered_df["Frequency Index"] = filtered_df["Frequency of Purchases"].map(freq_map)
-    fig6, ax6 = plt.subplots()
-    hb = ax6.hexbin(filtered_df["Payment Index"], filtered_df["Frequency Index"], gridsize=10, cmap="Blues", mincnt=1)
-    ax6.set_xlabel("Payment Method")
-    ax6.set_ylabel("Frequency of Purchases")
-    ax6.set_xticks(list(payment_map.values()))
-    ax6.set_xticklabels(list(payment_map.keys()), rotation=45)
-    ax6.set_yticks(list(freq_map.values()))
-    ax6.set_yticklabels(list(freq_map.keys()))
-    cb = fig6.colorbar(hb, ax=ax6)
-    cb.set_label("Кількість покупців")
-    st.pyplot(fig6)
+    fig3.update_layout(title_text="Sankey Diagram: Gender → Category → Season", font_size=12)
+    st.plotly_chart(fig3, use_container_width=True)
 
 # 🗺️ Сума покупок по штатах США
 st.subheader("🗺️ Сума покупок по штатах США")
 if "Location" in filtered_df.columns and "Purchase Amount (USD)" in filtered_df.columns:
-    # 🔹 Додай словник відповідності штатів
     state_name_to_code = {
         "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
         "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
@@ -124,27 +136,18 @@ if "Location" in filtered_df.columns and "Purchase Amount (USD)" in filtered_df.
         "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT",
         "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
     }
-
-    # 🔹 Групування суми покупок по штатах
     location_sum = filtered_df.groupby("Location")["Purchase Amount (USD)"].sum().reset_index()
     location_sum.columns = ["StateName", "Total Purchase"]
-
-    # 🔹 Перетворення назв штатів у коди
     location_sum["State"] = location_sum["StateName"].map(state_name_to_code)
-
-    # 🔹 Видалити рядки з невідомими штатами
     location_sum = location_sum.dropna(subset=["State"])
-
-    # 🔹 Побудова карти
     fig_map = px.choropleth(
         location_sum,
         locations="State",
         locationmode="USA-states",
         color="Total Purchase",
         scope="usa",
-        color_continuous_scale="YlOrRd",  # 🔥 світло-жовтий → червоний
+        color_continuous_scale="YlOrRd",
         labels={"Total Purchase": "Сума покупок ($)"},
         title="Сума покупок по штатах США"
     )
-
     st.plotly_chart(fig_map, use_container_width=True)
