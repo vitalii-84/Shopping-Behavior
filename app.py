@@ -112,7 +112,14 @@ if "Payment Method" in filtered_df.columns and "Frequency of Purchases" in filte
 st.subheader("🗺️ Сума покупок по штатах США")
 if "Location" in filtered_df.columns and "Purchase Amount (USD)" in filtered_df.columns:
     location_sum = filtered_df.groupby("Location")["Purchase Amount (USD)"].sum().reset_index()
-    location_sum.columns = ["State", "Total Purchase"]
+    location_sum.columns = ["StateName", "Total Purchase"]
+
+    # Перетворення назв штатів у коди
+    location_sum["State"] = location_sum["StateName"].map(state_name_to_code)
+
+    # Видалити рядки з невідомими штатами
+    location_sum = location_sum.dropna(subset=["State"])
+
     fig_map = px.choropleth(
         location_sum,
         locations="State",
@@ -123,4 +130,5 @@ if "Location" in filtered_df.columns and "Purchase Amount (USD)" in filtered_df.
         labels={"Total Purchase": "Сума покупок ($)"},
         title="Сума покупок по штатах США"
     )
+
     st.plotly_chart(fig_map, use_container_width=True)
