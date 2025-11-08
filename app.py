@@ -92,7 +92,7 @@ st.pyplot(fig1)
 st.subheader("📊 Кореляція між числовими змінними")
 numeric_cols = filtered_df.select_dtypes(include="number")
 if not numeric_cols.empty:
-    fig2, ax2 = plt.subplots(figsize=(8, 6))  # 🔧 Розмір графіка
+    fig2, ax2 = plt.subplots(figsize=(6, 6))  # 🔧 Розмір графіка
     sns.heatmap(numeric_cols.corr(), annot=True, cmap="coolwarm", ax=ax2)
     fig2.tight_layout()
     st.pyplot(fig2)
