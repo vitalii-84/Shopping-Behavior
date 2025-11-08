@@ -119,28 +119,28 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
 
     # 🔹 Побудова Sankey Diagram з чорним текстом
     fig3 = go.Figure(data=[go.Sankey(
-        node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color="black", width=0.5),
-            label=all_labels,
-            color="lightgray",  # фон вузлів
-            # 🔧 Чорний текст
-            labelfont=dict(color="black", size=12)
-        ),
-        link=dict(
-            source=source.tolist() + source2.tolist(),
-            target=target.tolist() + target2.tolist(),
-            value=value.tolist() + value2.tolist()
-        )
-    )])
-
-    fig3.update_layout(
-        title_text="Sankey Diagram: Gender → Category → Season",
-        font=dict(color="black", size=12)  # 🔧 Чорний текст заголовку
+    node=dict(
+        pad=15,
+        thickness=20,
+        line=dict(color="black", width=0.5),
+        label=all_labels,
+        color="lightgray"  # фон вузлів
+    ),
+    link=dict(
+        source=source.tolist() + source2.tolist(),
+        target=target.tolist() + target2.tolist(),
+        value=value.tolist() + value2.tolist()
     )
+)])
 
-    st.plotly_chart(fig3, use_container_width=True)
+# 🔧 Загальний стиль тексту (включає заголовок і мітки)
+fig3.update_layout(
+    title_text="Sankey Diagram: Gender → Category → Season",
+    font=dict(color="black", size=12)  # 🔧 Чорний текст
+)
+
+st.plotly_chart(fig3, use_container_width=True)
+
 
 
 # 🗺️ Інтерактивна карта суми покупок по штатах
