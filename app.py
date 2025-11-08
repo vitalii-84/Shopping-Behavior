@@ -110,8 +110,33 @@ if "Discount Applied" in filtered_df.columns and "Purchase Amount (USD)" in filt
 # 💳 Payment Method vs Frequency of Purchases
 st.subheader("💳 Спосіб оплати vs Частота покупок")
 if "Payment Method" in filtered_df.columns and "Frequency of Purchases" in filtered_df.columns:
-    payment_data = filtered_df.groupby("Payment Method")["Frequency of Purchases"].mean().reset_index()
-    fig6, ax6 = plt.subplots()
-    sns.barplot(data=payment_data, x="Payment Method", y="Frequency of Purchases", palette="magma", ax=ax6)
-    ax6.set_title("Середня частота покупок по способу оплати")
-    st.pyplot(fig6)
+    # Перетворення категорій у числові індекси
+    payment_map = {v: i for i, v in enumerate(filtered_df["Payment Method"].unique())}
+    freq_map = {v: i for i, v in enumerate(filtered_df["Frequency of Purchases"].unique())}
+
+    filtered_df["Payment Index"] = filtered_df["Payment Method"].map(payment_map)
+    filtered_df["Frequency Index"] = filtered_df["Frequency of Purchases"].map(freq_map)
+
+    fig7, ax7 = plt.subplots()
+    hb = ax7.hexbin(
+        filtered_df["Payment Index"],
+        filtered_df["Frequency Index"],
+        gridsize=10,
+        cmap="Blues",
+        mincnt=1
+    )
+
+    # Підписи осей
+    ax7.set_xlabel("Payment Method")
+    ax7.set_ylabel("Frequency of Purchases")
+
+    # Замінити числові індекси на текстові категорії
+    ax7.set_xticks(list(payment_map.values()))
+    ax7.set_xticklabels(list(payment_map.keys()), rotation=45)
+    ax7.set_yticks(list(freq_map.values()))
+    ax7.set_yticklabels(list(freq_map.keys()))
+
+    cb = fig7.colorbar(hb, ax=ax7)
+    cb.set_label("Кількість покупців")
+
+    st.pyplot(fig7)
