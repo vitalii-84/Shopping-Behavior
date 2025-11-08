@@ -82,7 +82,7 @@ st.bar_chart(filtered_df["Category"].value_counts())
 
 # 🧁 Кругова діаграма по статі
 st.subheader("👥 Розподіл статі")
-fig1, ax1 = plt.subplots(figsize=(6, 6))  # 🔧 Розмір графіка
+fig1, ax1 = plt.subplots(figsize=(3, 3))  # 🔧 Розмір графіка
 ax1.pie(filtered_df["Gender"].value_counts(), labels=filtered_df["Gender"].value_counts().index, autopct="%1.1f%%", startangle=90)
 ax1.axis("equal")
 fig1.tight_layout()  # 🔧 Адаптація до контейнера
