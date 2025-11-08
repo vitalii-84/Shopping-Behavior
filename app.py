@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import plotly.graph_objects as go
+import plotly.express as px
 
 st.set_page_config(page_title="🛍️ Shopping Behavior Dashboard", layout="wide")
 
@@ -23,23 +24,21 @@ age_range = st.sidebar.slider("Вік", int(df["Age"].min()), int(df["Age"].max(
 filtered_df = df[df["Gender"].isin(gender)]
 filtered_df = filtered_df[(filtered_df["Age"] >= age_range[0]) & (filtered_df["Age"] <= age_range[1])]
 
-# Layout
-col1, col2 = st.columns(2)
+# 🛒 Покупки по категоріях
+st.subheader("🛒 Покупки по категоріях")
+if "Category" in filtered_df.columns:
+    category_counts = filtered_df["Category"].value_counts()
+    st.bar_chart(category_counts)
 
-with col1:
-    st.subheader("🛒 Покупки по категоріях")
-    if "Category" in filtered_df.columns:
-        category_counts = filtered_df["Category"].value_counts()
-        st.bar_chart(category_counts)
+# 👥 Розподіл статі
+st.subheader("👥 Розподіл статі")
+gender_counts = filtered_df["Gender"].value_counts()
+fig1, ax1 = plt.subplots()
+ax1.pie(gender_counts, labels=gender_counts.index, autopct="%1.1f%%", startangle=90)
+ax1.axis("equal")
+st.pyplot(fig1)
 
-with col2:
-    st.subheader("👥 Розподіл статі")
-    gender_counts = filtered_df["Gender"].value_counts()
-    fig1, ax1 = plt.subplots()
-    ax1.pie(gender_counts, labels=gender_counts.index, autopct="%1.1f%%", startangle=90)
-    ax1.axis("equal")
-    st.pyplot(fig1)
-
+# 📊 Кореляція між числовими змінними
 st.subheader("📊 Кореляція між числовими змінними")
 numeric_cols = filtered_df.select_dtypes(include="number")
 if not numeric_cols.empty:
@@ -47,11 +46,13 @@ if not numeric_cols.empty:
     sns.heatmap(numeric_cols.corr(), annot=True, cmap="coolwarm", ax=ax2)
     st.pyplot(fig2)
 
+# 🎨 Популярність кольорів
 st.subheader("🎨 Популярність кольорів")
 if "Color" in filtered_df.columns:
     color_counts = filtered_df["Color"].value_counts()
     st.bar_chart(color_counts)
 
+# 🌤️ Сезонні покупки
 st.subheader("🌤️ Сезонні покупки")
 if "Season" in filtered_df.columns:
     season_counts = filtered_df["Season"].value_counts()
@@ -64,37 +65,18 @@ if "Season" in filtered_df.columns:
 st.subheader("🔀 Потік покупок: Gender → Category → Season")
 if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     sankey_df = filtered_df.groupby(["Gender", "Category", "Season"]).size().reset_index(name="count")
-
-    all_labels = pd.concat([
-        sankey_df["Gender"],
-        sankey_df["Category"],
-        sankey_df["Season"]
-    ]).unique().tolist()
-
+    all_labels = pd.concat([sankey_df["Gender"], sankey_df["Category"], sankey_df["Season"]]).unique().tolist()
     label_to_index = {label: i for i, label in enumerate(all_labels)}
-
     source = sankey_df["Gender"].map(label_to_index)
     target = sankey_df["Category"].map(label_to_index)
     value = sankey_df["count"]
-
     source2 = sankey_df["Category"].map(label_to_index)
     target2 = sankey_df["Season"].map(label_to_index)
     value2 = sankey_df["count"]
-
     fig4 = go.Figure(data=[go.Sankey(
-        node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color="black", width=0.5),
-            label=all_labels
-        ),
-        link=dict(
-            source=source.tolist() + source2.tolist(),
-            target=target.tolist() + target2.tolist(),
-            value=value.tolist() + value2.tolist()
-        )
+        node=dict(pad=15, thickness=20, line=dict(color="black", width=0.5), label=all_labels),
+        link=dict(source=source.tolist() + source2.tolist(), target=target.tolist() + target2.tolist(), value=value.tolist() + value2.tolist())
     )])
-
     fig4.update_layout(title_text="Sankey Diagram: Gender → Category → Season", font_size=12)
     st.plotly_chart(fig4, use_container_width=True)
 
@@ -107,36 +89,38 @@ if "Discount Applied" in filtered_df.columns and "Purchase Amount (USD)" in filt
     ax5.set_title("Середня сума покупки залежно від знижки")
     st.pyplot(fig5)
 
-# 💳 Payment Method vs Frequency of Purchases
-st.subheader("💳 Спосіб оплати vs Частота покупок")
+# 🔷 Hexbin: Payment Method vs Frequency of Purchases
+st.subheader("🔷 Hexbin: Payment Method vs Frequency of Purchases")
 if "Payment Method" in filtered_df.columns and "Frequency of Purchases" in filtered_df.columns:
-    # Перетворення категорій у числові індекси
     payment_map = {v: i for i, v in enumerate(filtered_df["Payment Method"].unique())}
     freq_map = {v: i for i, v in enumerate(filtered_df["Frequency of Purchases"].unique())}
-
     filtered_df["Payment Index"] = filtered_df["Payment Method"].map(payment_map)
     filtered_df["Frequency Index"] = filtered_df["Frequency of Purchases"].map(freq_map)
-
-    fig7, ax7 = plt.subplots()
-    hb = ax7.hexbin(
-        filtered_df["Payment Index"],
-        filtered_df["Frequency Index"],
-        gridsize=10,
-        cmap="Blues",
-        mincnt=1
-    )
-
-    # Підписи осей
-    ax7.set_xlabel("Payment Method")
-    ax7.set_ylabel("Frequency of Purchases")
-
-    # Замінити числові індекси на текстові категорії
-    ax7.set_xticks(list(payment_map.values()))
-    ax7.set_xticklabels(list(payment_map.keys()), rotation=45)
-    ax7.set_yticks(list(freq_map.values()))
-    ax7.set_yticklabels(list(freq_map.keys()))
-
-    cb = fig7.colorbar(hb, ax=ax7)
+    fig6, ax6 = plt.subplots()
+    hb = ax6.hexbin(filtered_df["Payment Index"], filtered_df["Frequency Index"], gridsize=10, cmap="Blues", mincnt=1)
+    ax6.set_xlabel("Payment Method")
+    ax6.set_ylabel("Frequency of Purchases")
+    ax6.set_xticks(list(payment_map.values()))
+    ax6.set_xticklabels(list(payment_map.keys()), rotation=45)
+    ax6.set_yticks(list(freq_map.values()))
+    ax6.set_yticklabels(list(freq_map.keys()))
+    cb = fig6.colorbar(hb, ax=ax6)
     cb.set_label("Кількість покупців")
+    st.pyplot(fig6)
 
-    st.pyplot(fig7)
+# 🗺️ Інтерактивна карта по Location
+st.subheader("🗺️ Кількість покупців по штатах США")
+if "Location" in filtered_df.columns:
+    location_counts = filtered_df["Location"].value_counts().reset_index()
+    location_counts.columns = ["State", "Count"]
+    fig_map = px.choropleth(
+        location_counts,
+        locations="State",
+        locationmode="USA-states",
+        color="Count",
+        scope="usa",
+        color_continuous_scale="Viridis",
+        labels={"Count": "Кількість покупців"},
+        title="Карта покупців по штатах США"
+    )
+    st.plotly_chart(fig_map, use_container_width=True)
