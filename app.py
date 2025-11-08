@@ -142,7 +142,7 @@ if "Location" in filtered_df.columns and "Purchase Amount (USD)" in filtered_df.
         locationmode="USA-states",
         color="Total Purchase",
         scope="usa",
-        color_continuous_scale="Viridis",
+        color_continuous_scale="YlOrRd",  # 🔥 світло-жовтий → червоний
         labels={"Total Purchase": "Сума покупок ($)"},
         title="Сума покупок по штатах США"
     )
