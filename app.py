@@ -97,6 +97,7 @@ if not numeric_cols.empty:
     fig2.tight_layout()
     st.pyplot(fig2)
 
+
 # 🔀 Sankey Diagram: Gender → Category → Season
 st.subheader("🔀 Потік покупок: Gender → Category → Season")
 
@@ -118,17 +119,31 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     target2 = sankey_df["Season"].map(label_to_index)
     value2 = sankey_df["count"]
 
-    # 🔹 Побудова Sankey Diagram з чорними підписами
+    # 🔹 Генерація кольорів для вузлів (наприклад, Pastel)
+    import random
+    import colorsys
+
+    def generate_colors(n):
+        hues = [i / n for i in range(n)]
+        return [
+            f"rgb({int(r*255)}, {int(g*255)}, {int(b*255)})"
+            for h in hues
+            for r, g, b in [colorsys.hsv_to_rgb(h, 0.5, 0.95)]
+        ][:n]
+
+    node_colors = generate_colors(len(all_labels))
+
+    # 🔹 Побудова Sankey Diagram з кольоровими вузлами і чорними підписами
     fig3 = go.Figure(data=[go.Sankey(
         node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color="black", width=0.5),
-            label=all_labels,
-            color="lightgray"  # фон вузлів (залишаємо нейтральним)
+            pad=15,  # 🔧 Відступ між вузлами
+            thickness=20,  # 🔧 Висота вузла
+            line=dict(color="black", width=0.5),  # 🔧 Рамка вузла
+            label=all_labels,  # 🔧 Текстові мітки
+            color=node_colors  # 🔧 Кольори вузлів
         ),
         link=dict(
-            source=source.tolist() + source2.tolist(),
+            source=source.tolist() + source2.tolist(),  # 🔧 Зв'язки між вузлами
             target=target.tolist() + target2.tolist(),
             value=value.tolist() + value2.tolist()
         )
@@ -137,7 +152,7 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     # 🔹 Чорний текст для всіх підписів і заголовку
     fig3.update_layout(
         title_text="Sankey Diagram: Gender → Category → Season",
-        font=dict(color="black", size=12)  # 🔧 Чорний текст
+        font=dict(color="black", size=14)  # 🔧 Чорний текст, збільшений розмір
     )
 
     # 🔹 Вивід графіка з адаптацією до ширини
