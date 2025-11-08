@@ -101,6 +101,10 @@ if not numeric_cols.empty:
 # 🔀 Sankey Diagram: Gender → Category → Season
 st.subheader("🔀 Потік покупок: Gender → Category → Season")
 
+import plotly.graph_objects as go
+import colorsys
+import pandas as pd
+
 if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     # 🔹 Групування даних
     sankey_df = filtered_df.groupby(["Gender", "Category", "Season"]).size().reset_index(name="count")
@@ -119,44 +123,54 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     target2 = sankey_df["Season"].map(label_to_index)
     value2 = sankey_df["count"]
 
-    # 🔹 Генерація кольорів для вузлів (наприклад, Pastel)
-    import random
-    import colorsys
-
+    # 🔹 Генерація яскравих кольорів (пастельна палітра)
     def generate_colors(n):
         hues = [i / n for i in range(n)]
         return [
-            f"rgb({int(r*255)}, {int(g*255)}, {int(b*255)})"
+            f"rgba({int(r*255)}, {int(g*255)}, {int(b*255)}, 0.9)"
             for h in hues
-            for r, g, b in [colorsys.hsv_to_rgb(h, 0.5, 0.95)]
+            for r, g, b in [colorsys.hsv_to_rgb(h, 0.5, 0.9)]
         ][:n]
 
     node_colors = generate_colors(len(all_labels))
 
-    # 🔹 Побудова Sankey Diagram з кольоровими вузлами і чорними підписами
+    # 🔹 Побудова Sankey Diagram із покращеною візуалізацією
     fig3 = go.Figure(data=[go.Sankey(
         node=dict(
-            pad=15,  # 🔧 Відступ між вузлами
-            thickness=20,  # 🔧 Висота вузла
-            line=dict(color="black", width=0.5),  # 🔧 Рамка вузла
-            label=all_labels,  # 🔧 Текстові мітки
-            color=node_colors  # 🔧 Кольори вузлів
+            pad=20,
+            thickness=25,
+            line=dict(color="black", width=0.8),
+            label=all_labels,
+            color=node_colors,
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=14,
+                font_color="black"
+            )
         ),
         link=dict(
-            source=source.tolist() + source2.tolist(),  # 🔧 Зв'язки між вузлами
+            source=source.tolist() + source2.tolist(),
             target=target.tolist() + target2.tolist(),
-            value=value.tolist() + value2.tolist()
+            value=value.tolist() + value2.tolist(),
+            color="rgba(150,150,150,0.3)"  # напівпрозорі лінії
         )
     )])
 
-    # 🔹 Чорний текст для всіх підписів і заголовку
+    # 🔹 Покращений стиль діаграми
     fig3.update_layout(
-        title_text="Sankey Diagram: Gender → Category → Season",
-        font=dict(color="black", size=14)  # 🔧 Чорний текст, збільшений розмір
+        title=dict(
+            text="Sankey Diagram: Gender → Category → Season",
+            font=dict(size=18, color="black"),
+            x=0.5
+        ),
+        font=dict(color="black", size=15),
+        plot_bgcolor="white",
+        paper_bgcolor="white"
     )
 
-    # 🔹 Вивід графіка з адаптацією до ширини
+    # 🔹 Вивід у Streamlit
     st.plotly_chart(fig3, use_container_width=True)
+
 
 
 
