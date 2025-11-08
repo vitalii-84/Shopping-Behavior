@@ -46,7 +46,7 @@ if not numeric_cols.empty:
     st.pyplot(fig2)
 
 st.subheader("📍 Вік vs Сума покупки")
-if "Purchase Amount" in filtered_df.columns:
+if "Purchase Amount (USD)" in filtered_df.columns:
     fig3, ax3 = plt.subplots()
-    sns.scatterplot(data=filtered_df, x="Age", y="Purchase Amount", hue="Gender", ax=ax3)
+    sns.scatterplot(data=filtered_df, x="Age", y="Purchase Amount (USD)", hue="Gender", ax=ax3)
     st.pyplot(fig3)
