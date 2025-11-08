@@ -84,7 +84,7 @@ st.bar_chart(filtered_df["Category"].value_counts())
 
 # 👥 Розподіл статі
 st.subheader("👥 Розподіл статі")
-fig1, ax1 = plt.subplots(figsize=(6, 6))  # 👈 регулювання розміру
+fig1, ax1 = plt.subplots(figsize=(3, 3))  # 👈 регулювання розміру
 ax1.pie(filtered_df["Gender"].value_counts(), labels=filtered_df["Gender"].value_counts().index, autopct="%1.1f%%", startangle=90)
 ax1.axis("equal")
 st.pyplot(fig1)
