@@ -99,22 +99,50 @@ if not numeric_cols.empty:
 
 # 🔀 Sankey Diagram: Gender → Category → Season
 st.subheader("🔀 Потік покупок: Gender → Category → Season")
+
 if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
+    # 🔹 Групування даних
     sankey_df = filtered_df.groupby(["Gender", "Category", "Season"]).size().reset_index(name="count")
+
+    # 🔹 Унікальні мітки для вузлів
     all_labels = pd.concat([sankey_df["Gender"], sankey_df["Category"], sankey_df["Season"]]).unique().tolist()
     label_to_index = {label: i for i, label in enumerate(all_labels)}
+
+    # 🔹 Потоки: Gender → Category
     source = sankey_df["Gender"].map(label_to_index)
     target = sankey_df["Category"].map(label_to_index)
     value = sankey_df["count"]
+
+    # 🔹 Потоки: Category → Season
     source2 = sankey_df["Category"].map(label_to_index)
     target2 = sankey_df["Season"].map(label_to_index)
     value2 = sankey_df["count"]
+
+    # 🔹 Побудова Sankey Diagram з чорними підписами
     fig3 = go.Figure(data=[go.Sankey(
-        node=dict(pad=15, thickness=20, line=dict(color="black", width=0.5), label=all_labels),
-        link=dict(source=source.tolist() + source2.tolist(), target=target.tolist() + target2.tolist(), value=value.tolist() + value2.tolist())
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=all_labels,
+            color="lightgray"  # фон вузлів (залишаємо нейтральним)
+        ),
+        link=dict(
+            source=source.tolist() + source2.tolist(),
+            target=target.tolist() + target2.tolist(),
+            value=value.tolist() + value2.tolist()
+        )
     )])
-    fig3.update_layout(title_text="Sankey Diagram: Gender → Category → Season", font_size=12)
-    st.plotly_chart(fig3, use_container_width=True)  # 🔧 Адаптація до ширини
+
+    # 🔹 Чорний текст для всіх підписів і заголовку
+    fig3.update_layout(
+        title_text="Sankey Diagram: Gender → Category → Season",
+        font=dict(color="black", size=12)  # 🔧 Чорний текст
+    )
+
+    # 🔹 Вивід графіка з адаптацією до ширини
+    st.plotly_chart(fig3, use_container_width=True)
+
 
 
 
