@@ -108,19 +108,19 @@ if "Payment Method" in filtered_df.columns and "Frequency of Purchases" in filte
     cb.set_label("Кількість покупців")
     st.pyplot(fig6)
 
-# 🗺️ Інтерактивна карта по Location
-st.subheader("🗺️ Кількість покупців по штатах США")
-if "Location" in filtered_df.columns:
-    location_counts = filtered_df["Location"].value_counts().reset_index()
-    location_counts.columns = ["State", "Count"]
+# 🗺️ Сума покупок по штатах США
+st.subheader("🗺️ Сума покупок по штатах США")
+if "Location" in filtered_df.columns and "Purchase Amount (USD)" in filtered_df.columns:
+    location_sum = filtered_df.groupby("Location")["Purchase Amount (USD)"].sum().reset_index()
+    location_sum.columns = ["State", "Total Purchase"]
     fig_map = px.choropleth(
-        location_counts,
+        location_sum,
         locations="State",
         locationmode="USA-states",
-        color="Count",
+        color="Total Purchase",
         scope="usa",
         color_continuous_scale="Viridis",
-        labels={"Count": "Кількість покупців"},
-        title="Карта покупців по штатах США"
+        labels={"Total Purchase": "Сума покупок ($)"},
+        title="Сума покупок по штатах США"
     )
     st.plotly_chart(fig_map, use_container_width=True)
