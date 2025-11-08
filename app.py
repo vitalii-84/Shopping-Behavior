@@ -60,25 +60,6 @@ if "Season" in filtered_df.columns:
     ax3.axis("equal")
     st.pyplot(fig3)
 
-st.subheader("🧭 Порівняння покупок по категоріях (Radar Chart)")
-if "Purchase Amount (USD)" in filtered_df.columns and "Category" in filtered_df.columns:
-    radar_data = filtered_df.groupby(["Gender", "Category"])["Purchase Amount (USD)"].mean().unstack(fill_value=0)
-    categories = radar_data.columns.tolist()
-    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
-    angles += angles[:1]
-
-    fig4, ax4 = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
-    for g in radar_data.index:
-        values = radar_data.loc[g].tolist()
-        values += values[:1]
-        ax4.plot(angles, values, label=g)
-        ax4.fill(angles, values, alpha=0.1)
-    ax4.set_xticks(angles[:-1])
-    ax4.set_xticklabels(categories)
-    ax4.set_title("Середня сума покупки по категоріях")
-    ax4.legend(loc="upper right")
-    st.pyplot(fig4)
-
 # 🔀 Sankey Diagram: Gender → Category → Season
 st.subheader("🔀 Потік покупок: Gender → Category → Season")
 if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
@@ -96,12 +77,11 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     target = sankey_df["Category"].map(label_to_index)
     value = sankey_df["count"]
 
-    # Second layer: Category → Season
     source2 = sankey_df["Category"].map(label_to_index)
     target2 = sankey_df["Season"].map(label_to_index)
     value2 = sankey_df["count"]
 
-    fig5 = go.Figure(data=[go.Sankey(
+    fig4 = go.Figure(data=[go.Sankey(
         node=dict(
             pad=15,
             thickness=20,
@@ -115,5 +95,14 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
         )
     )])
 
-    fig5.update_layout(title_text="Sankey Diagram: Gender → Category → Season", font_size=12)
-    st.plotly_chart(fig5, use_container_width=True)
+    fig4.update_layout(title_text="Sankey Diagram: Gender → Category → Season", font_size=12)
+    st.plotly_chart(fig4, use_container_width=True)
+
+# 💸 Discount vs Purchase Amount
+st.subheader("💸 Знижка vs Сума покупки")
+if "Discount Applied" in filtered_df.columns and "Purchase Amount (USD)" in filtered_df.columns:
+    discount_data = filtered_df.groupby("Discount Applied")["Purchase Amount (USD)"].mean().reset_index()
+    fig5, ax5 = plt.subplots()
+    sns.barplot(data=discount_data, x="Discount Applied", y="Purchase Amount (USD)", palette="viridis", ax=ax5)
+    ax5.set_title("Середня сума покупки залежно від знижки")
+    st.pyplot(fig5)
