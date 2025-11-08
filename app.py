@@ -105,7 +105,7 @@ st.markdown("""
 """)
 numeric_cols = filtered_df.select_dtypes(include="number")
 if not numeric_cols.empty:
-    fig2, ax2 = plt.subplots(figsize=(4, 4))  # 🔧 Розмір графіка
+    fig2, ax2 = plt.subplots(figsize=(6, 4))  # 🔧 Розмір графіка
     sns.heatmap(numeric_cols.corr(), annot=True, cmap="coolwarm", ax=ax2)
     fig2.tight_layout()
     st.pyplot(fig2)
