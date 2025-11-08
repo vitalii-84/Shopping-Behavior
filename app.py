@@ -7,7 +7,7 @@ st.set_page_config(page_title="🛍️ Shopping Behavior Dashboard", layout="wid
 
 @st.cache_data
 def load_data():
-    return pd.read_csv("shopping_behavior.csv")
+    return pd.read_csv("shopping_behavior_csv.csv")
 
 df = load_data()
 
