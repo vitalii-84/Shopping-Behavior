@@ -115,7 +115,7 @@ st.markdown(f"""
 
   <!-- Силует чоловіка -->
   <div>
-    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg" width="255"/>
+    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg" width="260"/>
   </div>
 
   <!-- Правий підпис -->
