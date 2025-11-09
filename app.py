@@ -106,35 +106,44 @@ st.dataframe(pd.DataFrame({
     "Відсоток": category_pct.values
 }))
 
-# 🌳 TreeMap: Покупки по категоріях з підписами всередині
+# 🌳 TreeMap: Покупки по категоріях з текстом по центру
 st.subheader("🌳 Покупки по категоріях (TreeMap)")
 st.markdown("""
 Ця візуалізація показує розподіл покупок по категоріях у вигляді прямокутників, 
 де площа кожного елемента відповідає кількості покупок. Відсотки розміщені 
-посередині кожного прямокутника для кращого сприйняття.
+всередині кожного прямокутника для кращого сприйняття.
 """)
 
 # 🔹 Підготовка даних
 category_counts = filtered_df["Category"].value_counts()
 category_pct = (category_counts / category_counts.sum() * 100).round(1)
+
 df_treemap = pd.DataFrame({
     "Category": category_counts.index,
     "Count": category_counts.values,
-    "Label": [f"{cat}<br>{pct:.1f}%" for cat, pct in zip(category_counts.index, category_pct)]
+    "Percent": category_pct.values
 })
 
 # 🔹 Побудова TreeMap
 fig_tree = px.treemap(
     df_treemap,
-    path=["Label"],
+    path=["Category"],
     values="Count",
     color="Count",
     color_continuous_scale="Blues",
+    custom_data=["Percent"],
     title="TreeMap: Покупки по категоріях"
+)
+
+# 🔹 Центрування тексту через шаблон
+fig_tree.update_traces(
+    texttemplate="%{label}<br>%{customdata[0]}%",
+    textinfo="label+text"
 )
 
 # 🔹 Вивід у Streamlit
 st.plotly_chart(fig_tree, use_container_width=True)
+
 
 
 
