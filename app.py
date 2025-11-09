@@ -131,22 +131,22 @@ gender_counts = filtered_df["Gender"].value_counts(normalize=True) * 100
 female_pct = round(gender_counts.get("Female", 0), 1)
 male_pct = round(gender_counts.get("Male", 0), 1)
 
-# 🔹 Вивід зображень з GitHub
+# 🔹 Вивід зображень з GitHub з однаковим розміром і без підписів
 col1, col2 = st.columns(2)
 
 with col1:
     st.image(
         "https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg",
-        caption=f"{female_pct}% Жінки",
-        use_column_width=True
+        width=150  # 🔧 Зменшено розмір
     )
+    st.markdown(f"<h3 style='text-align: center;'>{female_pct}%</h3>", unsafe_allow_html=True)
 
 with col2:
     st.image(
         "https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg",
-        caption=f"{male_pct}% Чоловіки",
-        use_column_width=True
+        width=150  # 🔧 Зменшено розмір до однакового
     )
+    st.markdown(f"<h3 style='text-align: center;'>{male_pct}%</h3>", unsafe_allow_html=True)
 
 
 
