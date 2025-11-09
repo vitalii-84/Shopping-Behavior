@@ -131,24 +131,14 @@ gender_counts = filtered_df["Gender"].value_counts(normalize=True) * 100
 female_pct = round(gender_counts.get("Female", 0), 1)
 male_pct = round(gender_counts.get("Male", 0), 1)
 
-# 🔹 Вивід зображень з GitHub з однаковим розміром і без підписів
+# 🔹 Вивід зображень з однаковим розміром і вирівняними підписами
 col1, col2 = st.columns(2)
 
 with col1:
-    st.image(
-        "https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg",
-        width=150  # 🔧 Зменшено розмір
-    )
-    st.markdown(f"<h3 style='text-align: center;'>{female_pct}%</h3>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align: center;'><img src='https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg' width='160'/><h3>{female_pct}%</h3></div>", unsafe_allow_html=True)
 
 with col2:
-    st.image(
-        "https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg",
-        width=150  # 🔧 Зменшено розмір до однакового
-    )
-    st.markdown(f"<h3 style='text-align: center;'>{male_pct}%</h3>", unsafe_allow_html=True)
-
-
+    st.markdown(f"<div style='text-align: center;'><img src='https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg' width='160'/><h3>{male_pct}%</h3></div>", unsafe_allow_html=True)
 
 
 
