@@ -458,7 +458,7 @@ st.plotly_chart(fig_map, use_container_width=True)
 st.subheader("📊 Покупки за віковими групами")
 st.markdown("""
 Ця візуалізація показує, які вікові групи витрачають найбільше онлайн. 
-Групи сформовані з кроком у 5 років, починаючи з 18 років.
+Групи чітко визначені: 18–23, 24–29, ..., 72–77.
 Три найактивніші групи виділені різними відтінками синього, найменш активна — червоним.
 """)
 
@@ -466,13 +466,12 @@ import pandas as pd
 import plotly.express as px
 
 if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
-    # 🔹 Встановлення меж
-    min_age = 18
-    max_age = int(filtered_df["Age"].max())
-
-    # 🔹 Формування інтервалів з кроком 5 років
-    bins = list(range(min_age, max_age + 6, 5))  # +6 щоб включити max_age
-    labels = [f"{bins[i]}–{bins[i+1]-1}" for i in range(len(bins)-1)]
+    # 🔹 Чітко задані вікові межі
+    bins = [18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78]  # верхня межа +1
+    labels = [
+        "18–23", "24–29", "30–35", "36–41", "42–47",
+        "48–53", "54–59", "60–65", "66–71", "72–77"
+    ]
 
     # 🔹 Створення вікових груп
     filtered_df["Age Group"] = pd.cut(filtered_df["Age"], bins=bins, labels=labels, right=False)
@@ -486,8 +485,8 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
         .dropna()
     )
 
-    # 🔹 Сортування вікових груп по зростанню
-    age_group_sum["SortIndex"] = age_group_sum["Age Group"].apply(lambda x: int(str(x).split("–")[0]))
+    # 🔹 Сортування вікових груп у правильному порядку
+    age_group_sum["SortIndex"] = age_group_sum["Age Group"].apply(lambda x: labels.index(str(x)))
     age_group_sum = age_group_sum.sort_values("SortIndex", ascending=True).drop(columns="SortIndex")
 
     # 🔹 Визначення топ-3 і мінімальної групи
@@ -528,7 +527,7 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
     fig_age.update_layout(
         xaxis_title="Сума покупок (USD)",
         yaxis_title="Вікова група",
-        yaxis=dict(categoryorder="array", categoryarray=age_group_sum["Age Group"].tolist()),
+        yaxis=dict(categoryorder="array", categoryarray=labels),
         showlegend=False,
         font=dict(size=14),
         plot_bgcolor="white",
