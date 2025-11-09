@@ -110,7 +110,7 @@ st.markdown(f"""
 
   <!-- Силует жінки -->
   <div>
-    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg" width="250"/>
+    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg" width="260"/>
   </div>
 
   <!-- Силует чоловіка -->
