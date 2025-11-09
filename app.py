@@ -308,12 +308,13 @@ st.markdown("""
 а потім — на сезон покупки. Це допомагає виявити поведінкові патерни.
 """)
 
-# 📘 Легенда кольорів
+# 📘 Легенда кольорів сезонів
 st.markdown("""
-**🎨 Легенда кольорів:**
-- 🟦 Світло-голубий — **Найбільш помітні потоки**
-- 🟨 Світло-жовтий — **Сезонний зв’язок**
-- 🟥 Світло-червоний — **Несподівано малий потік**
+**🎨 Кольори сезонів:**
+- 🌱 Spring — зелений
+- ❄️ Winter — синій
+- 🍂 Fall — сірий
+- ☀️ Summer — жовтий
 """)
 
 import plotly.graph_objects as go
@@ -343,43 +344,22 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     all_target = target_gc.tolist() + target_cs.tolist()
     all_value = value_gc.tolist() + value_cs.tolist()
 
-    # 🔹 Індивідуальне призначення кольорів для потоків
-    all_color = []
-    for s, t in zip(all_source, all_target):
-        src_label = all_labels[s]
-        tgt_label = all_labels[t]
-
-        # Світло-голубий — найбільш помітні потоки
-        if (src_label == "Female" and tgt_label == "Accessories") or \
-           (src_label == "Accessories" and tgt_label == "Summer") or \
-           (src_label == "Male" and tgt_label == "Clothing") or \
-           (src_label == "Clothing" and tgt_label == "Fall"):
-            all_color.append("rgba(173,216,230,0.6)")
-
-        # Світло-жовтий — сезонний зв’язок
-        elif (src_label == "Accessories" and tgt_label == "Summer") or \
-             (src_label == "Clothing" and tgt_label == "Winter"):
-            all_color.append("rgba(255,255,153,0.6)")
-
-        # Світло-червоний — несподівано малий потік
-        elif (src_label == "Female" and tgt_label == "Footwear") or \
-             (src_label == "Footwear" and tgt_label == "Spring" and "Female" in sankey_df["Gender"].unique()):
-            all_color.append("rgba(255,182,193,0.6)")
-
-        # Інші — напівпрозорі
+    # 🔹 Кольори вузлів з урахуванням сезонів
+    node_colors = []
+    for label in all_labels:
+        if label == "Spring":
+            node_colors.append("rgba(0,128,0,0.8)")       # зелений
+        elif label == "Winter":
+            node_colors.append("rgba(0,0,255,0.8)")        # синій
+        elif label == "Fall":
+            node_colors.append("rgba(128,128,128,0.8)")    # сірий
+        elif label == "Summer":
+            node_colors.append("rgba(255,215,0,0.8)")      # жовтий
         else:
-            all_color.append("rgba(150,150,150,0.3)")
-
-    # 🔹 Генерація кольорів вузлів
-    def generate_colors(n):
-        hues = [i / n for i in range(n)]
-        return [
-            f"rgba({int(r*255)}, {int(g*255)}, {int(b*255)}, 0.9)"
-            for h in hues
-            for r, g, b in [colorsys.hsv_to_rgb(h, 0.5, 0.9)]
-        ][:n]
-
-    node_colors = generate_colors(len(all_labels))
+            # Генерація пастельного кольору для інших вузлів
+            h = hash(label) % 360
+            r, g, b = colorsys.hsv_to_rgb(h / 360, 0.4, 0.9)
+            node_colors.append(f"rgba({int(r*255)}, {int(g*255)}, {int(b*255)}, 0.6)")
 
     # 🔹 Побудова Sankey Diagram
     fig3 = go.Figure(data=[go.Sankey(
@@ -399,7 +379,7 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
             source=all_source,
             target=all_target,
             value=all_value,
-            color=all_color
+            color="rgba(150,150,150,0.3)"  # напівпрозорі лінії
         )
     )])
 
@@ -417,7 +397,6 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
 
     # 🔹 Вивід у Streamlit
     st.plotly_chart(fig3, use_container_width=True)
-
 
 
 
