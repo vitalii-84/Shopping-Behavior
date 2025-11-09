@@ -452,4 +452,3 @@ fig_map.update_layout(
 
 # 🔹 Вивід у Streamlit
 st.plotly_chart(fig_map, use_container_width=True)
-
