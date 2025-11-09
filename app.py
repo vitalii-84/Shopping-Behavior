@@ -98,36 +98,66 @@ fig1.tight_layout()  # 👈 адаптація до контейнера
 st.pyplot(fig1)
 
 
-# 🔥 Теплова карта кореляцій
-st.subheader("📊 Кореляція між числовими змінними")
+# 🔥 Теплова карта взаємозв’язків (підтримує і категоріальні, і числові змінні)
+st.subheader("📊 Теплова карта взаємозв’язків між змінними")
 st.markdown("""
-Теплова карта показує, як різні числові змінні пов’язані між собою. 
-Наприклад, частота покупок може корелювати з сумою витрат.
+Ця теплова карта показує силу взаємозв’язків між змінними, включно з категоріальними (наприклад, стать, категорія товару, спосіб оплати).
+Для оцінки зв’язків використовується коефіцієнт **Cramér’s V**, який підходить для якісних ознак.
 """)
 
-numeric_cols = filtered_df.select_dtypes(include="number")
+from scipy.stats import chi2_contingency
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-if not numeric_cols.empty:
-    fig2, ax2 = plt.subplots(figsize=(6, 4))  # 🔧 Розмір графіка
-    sns.heatmap(
-        numeric_cols.corr(),
-        annot=True,
-        cmap="coolwarm",
-        ax=ax2,
-        annot_kws={"size": 8},       # 🔹 Менший шрифт чисел у клітинках
-        cbar_kws={"shrink": 0.8}     # 🔹 Трохи зменшена кольорова шкала
-    )
+# 🔹 Вибір колонок для аналізу
+cols = [
+    "Age", "Gender", "Item Purchased", "Category", "Purchase Amount (USD)",
+    "Location", "Size", "Color", "Season", "Review Rating",
+    "Subscription Status", "Shipping Type", "Discount Applied",
+    "Promo Code Used", "Previous Purchases", "Payment Method",
+    "Frequency of Purchases"
+]
 
-    # 🔹 Налаштовуємо шрифти осей
-    ax2.tick_params(axis='x', labelsize=8, rotation=45)  # менші підписи знизу
-    ax2.tick_params(axis='y', labelsize=8)               # менші підписи зліва
+df_corr = filtered_df[cols].dropna()
 
-    # 🔹 Компактніше розташування
-    fig2.tight_layout()
+# 🔹 Функція для обчислення Cramér’s V (підтримує будь-які категоріальні змінні)
+def cramers_v(x, y):
+    confusion_matrix = pd.crosstab(x, y)
+    chi2 = chi2_contingency(confusion_matrix)[0]
+    n = confusion_matrix.sum().sum()
+    phi2 = chi2 / n
+    r, k = confusion_matrix.shape
+    phi2corr = max(0, phi2 - ((k-1)*(r-1))/(n-1))
+    rcorr = r - ((r-1)**2)/(n-1)
+    kcorr = k - ((k-1)**2)/(n-1)
+    return np.sqrt(phi2corr / min((kcorr-1), (rcorr-1)))
 
-    st.pyplot(fig2)
-else:
-    st.info("У вибраних даних немає числових змінних для побудови кореляції.")
+# 🔹 Побудова кореляційної матриці
+corr_matrix = pd.DataFrame(index=cols, columns=cols, dtype=float)
+
+for c1 in cols:
+    for c2 in cols:
+        if c1 == c2:
+            corr_matrix.loc[c1, c2] = 1.0
+        else:
+            corr_matrix.loc[c1, c2] = cramers_v(df_corr[c1].astype(str), df_corr[c2].astype(str))
+
+# 🔹 Візуалізація теплової карти
+fig, ax = plt.subplots(figsize=(12, 9))
+sns.heatmap(
+    corr_matrix.astype(float),
+    annot=True,
+    cmap="YlGnBu",
+    linewidths=0.5,
+    fmt=".2f",
+    annot_kws={"size": 8}
+)
+plt.title("Взаємозв’язки між змінними (Cramér’s V)", fontsize=14)
+plt.xticks(rotation=45, ha="right", fontsize=8)
+plt.yticks(fontsize=8)
+fig.tight_layout()
+st.pyplot(fig)
 
 
 # 🔀 Sankey Diagram: Gender → Category → Season
