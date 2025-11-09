@@ -237,7 +237,7 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     # 🔹 Вивід у Streamlit
     st.plotly_chart(fig3, use_container_width=True)
 
-
+'''
 
 # 🗺️ Інтерактивна карта суми покупок по штатах
 st.subheader("🗺️ Сума покупок по штатах США")
@@ -272,3 +272,91 @@ fig_map = px.choropleth(
     title="Сума покупок по штатах США"
 )
 st.plotly_chart(fig_map, use_container_width=True)
+'''
+
+# 🗺️ Сума покупок по штатах США
+st.subheader("🗺️ Сума покупок по штатах США")
+st.markdown("""
+Ця карта показує, в яких штатах США покупці витрачають найбільше. 
+Скорочені назви штатів допомагають швидко зорієнтуватися на мапі.
+""")
+
+# 🔹 Словник скорочень штатів
+state_name_to_code = {
+    "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
+    "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
+    "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
+    "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
+    "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS", "Missouri": "MO",
+    "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH", "New Jersey": "NJ",
+    "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH",
+    "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
+    "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT",
+    "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
+}
+
+# 🔹 Координати центрів штатів (спрощено)
+state_coords = {
+    "CA": [-119.4179, 36.7783], "TX": [-99.9018, 31.9686], "NY": [-75.4999, 43.0000],
+    "FL": [-81.5158, 27.6648], "IL": [-89.3985, 40.6331], "PA": [-77.1945, 41.2033],
+    "OH": [-82.9071, 40.4173], "GA": [-82.9071, 32.1656], "NC": [-79.0193, 35.7596],
+    "MI": [-85.6024, 44.3148], "NJ": [-74.4057, 40.0583], "VA": [-78.6569, 37.4316],
+    "WA": [-120.7401, 47.7511], "AZ": [-111.0937, 34.0489], "MA": [-71.3824, 42.4072],
+    "TN": [-86.5804, 35.5175], "IN": [-86.1349, 40.2672], "MO": [-91.8318, 37.9643],
+    "WI": [-89.6165, 43.7844], "CO": [-105.7821, 39.5501], "MN": [-94.6859, 46.7296],
+    "SC": [-81.1637, 33.8361], "AL": [-86.9023, 32.3182], "LA": [-91.9623, 30.9843],
+    "KY": [-84.2700, 37.8393], "OR": [-120.5542, 43.8041], "OK": [-97.0929, 35.0078],
+    "CT": [-72.7554, 41.6032], "IA": [-93.0977, 41.8780], "MS": [-89.3985, 32.3547],
+    "AR": [-92.3731, 35.2010], "KS": [-98.4842, 39.0119], "UT": [-111.0937, 39.3200],
+    "NV": [-116.4194, 38.8026], "NM": [-105.8701, 34.5199], "NE": [-99.9018, 41.4925],
+    "WV": [-80.4549, 38.5976], "ID": [-114.7420, 44.0682], "HI": [-155.5828, 19.8968],
+    "NH": [-71.5724, 43.1939], "ME": [-69.4455, 45.2538], "RI": [-71.4774, 41.5801],
+    "MT": [-110.3626, 46.8797], "DE": [-75.5277, 38.9108], "SD": [-99.9018, 43.9695],
+    "ND": [-101.0020, 47.5515], "VT": [-72.5778, 44.5588], "AK": [-149.4937, 64.2008],
+    "WY": [-107.2903, 43.0759]
+}
+
+# 🔹 Підготовка даних
+location_sum = filtered_df.groupby("Location")["Purchase Amount (USD)"].sum().reset_index()
+location_sum.columns = ["StateName", "Total Purchase"]
+location_sum["State"] = location_sum["StateName"].map(state_name_to_code)
+location_sum = location_sum.dropna(subset=["State"])
+
+# 🔹 Побудова карти
+fig_map = go.Figure()
+
+# 🔸 Хлороплет
+fig_map.add_trace(go.Choropleth(
+    locations=location_sum["State"],
+    z=location_sum["Total Purchase"],
+    locationmode="USA-states",
+    colorscale="YlOrRd",
+    colorbar_title="Сума покупок ($)",
+    marker_line_color="white"
+))
+
+# 🔸 Текстові підписи
+for i, row in location_sum.iterrows():
+    code = row["State"]
+    if code in state_coords:
+        lon, lat = state_coords[code]
+        fig_map.add_trace(go.Scattergeo(
+            locationmode="USA-states",
+            lon=[lon],
+            lat=[lat],
+            text=code,
+            mode="text",
+            showlegend=False,
+            textfont=dict(color="black", size=10)
+        ))
+
+# 🔹 Оформлення
+fig_map.update_layout(
+    title_text="Сума покупок по штатах США",
+    geo=dict(scope="usa", projection=go.layout.geo.Projection(type="albers usa")),
+    margin=dict(l=0, r=0, t=50, b=0)
+)
+
+# 🔹 Вивід у Streamlit
+st.plotly_chart(fig_map, use_container_width=True)
+
