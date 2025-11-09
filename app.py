@@ -237,42 +237,7 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     # 🔹 Вивід у Streamlit
     st.plotly_chart(fig3, use_container_width=True)
 
-'''
 
-# 🗺️ Інтерактивна карта суми покупок по штатах
-st.subheader("🗺️ Сума покупок по штатах США")
-st.markdown("""
-Ця карта показує, в яких штатах США покупці витрачають найбільше. 
-Це корисно для геотаргетингу та логістичного планування.
-""")
-state_name_to_code = {
-    "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
-    "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
-    "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
-    "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
-    "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS", "Missouri": "MO",
-    "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH", "New Jersey": "NJ",
-    "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH",
-    "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
-    "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT",
-    "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
-}
-location_sum = filtered_df.groupby("Location")["Purchase Amount (USD)"].sum().reset_index()
-location_sum.columns = ["StateName", "Total Purchase"]
-location_sum["State"] = location_sum["StateName"].map(state_name_to_code)
-location_sum = location_sum.dropna(subset=["State"])
-fig_map = px.choropleth(
-    location_sum,
-    locations="State",
-    locationmode="USA-states",
-    color="Total Purchase",
-    scope="usa",
-    color_continuous_scale="YlOrRd",
-    labels={"Total Purchase": "Сума покупок ($)"},
-    title="Сума покупок по штатах США"
-)
-st.plotly_chart(fig_map, use_container_width=True)
-'''
 
 # 🗺️ Сума покупок по штатах США
 st.subheader("🗺️ Сума покупок по штатах США")
