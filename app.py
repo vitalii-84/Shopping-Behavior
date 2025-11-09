@@ -460,6 +460,7 @@ st.subheader("📊 Покупки за віковими групами")
 st.markdown("""
 Ця візуалізація показує, які вікові групи витрачають найбільше онлайн. 
 Перша група охоплює наймолодших покупців до 23 років, далі — інтервали по 5 років.
+Три найактивніші групи виділені різними відтінками синього, найменш активна — червоним.
 """)
 
 import pandas as pd
@@ -471,7 +472,7 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
     max_age = int(filtered_df["Age"].max())
 
     # 🔹 Формування вікових інтервалів
-    bins = [min_age, 24] + list(range(25, max_age + 6, 5))  # +6 щоб включити max_age
+    bins = [min_age, 24] + list(range(25, max_age + 6, 5))
     labels = [f"{bins[i]}–{bins[i+1]-1}" for i in range(len(bins)-1)]
 
     # 🔹 Створення вікових груп
@@ -486,13 +487,27 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
         .dropna()
     )
 
-    # 🔹 Визначення найактивнішої групи
-    max_group = age_group_sum.loc[age_group_sum["Purchase Amount (USD)"].idxmax(), "Age Group"]
+    # 🔹 Сортування та визначення топ-3 і мінімальної групи
+    sorted_groups = age_group_sum.sort_values("Purchase Amount (USD)", ascending=False).reset_index(drop=True)
+    top1 = sorted_groups.loc[0, "Age Group"]
+    top2 = sorted_groups.loc[1, "Age Group"] if len(sorted_groups) > 1 else None
+    top3 = sorted_groups.loc[2, "Age Group"] if len(sorted_groups) > 2 else None
+    bottom = sorted_groups.loc[len(sorted_groups)-1, "Age Group"]
 
-    # 🔹 Додавання кольору
-    age_group_sum["Color"] = age_group_sum["Age Group"].apply(
-        lambda x: "darkblue" if x == max_group else "lightgray"
-    )
+    # 🔹 Призначення кольорів
+    def assign_color(group):
+        if group == top1:
+            return "darkblue"
+        elif group == top2:
+            return "blue"
+        elif group == top3:
+            return "lightblue"
+        elif group == bottom:
+            return "red"
+        else:
+            return "lightgray"
+
+    age_group_sum["Color"] = age_group_sum["Age Group"].apply(assign_color)
 
     # 🔹 Побудова графіка
     fig_age = px.bar(
