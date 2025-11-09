@@ -141,6 +141,45 @@ with col2:
     st.markdown(f"<div style='text-align: center;'><img src='https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg' width='160'/><h3>{male_pct}%</h3></div>", unsafe_allow_html=True)
 
 
+# 👥 Візуалізація розподілу статі з силуетами
+st.subheader("👥 Розподіл статі")
+st.markdown("""
+Ця візуалізація показує співвідношення між чоловіками та жінками серед покупців 
+у більш емоційній формі — через силуети. Це дозволяє краще сприймати дані 
+і створює візуальний зв’язок із аудиторією.
+""")
+
+# 🔹 Підрахунок відсотків
+gender_counts = filtered_df["Gender"].value_counts(normalize=True) * 100
+female_pct = round(gender_counts.get("Female", 0), 1)
+male_pct = round(gender_counts.get("Male", 0), 1)
+
+# 🔹 HTML-блок з вирівнюванням і стилями
+st.markdown(f"""
+<div style="display: flex; justify-content: center; align-items: center; gap: 20mm;">
+  
+  <!-- Лівий підпис -->
+  <div style="text-align: right;">
+    <h2 style="color: red; margin-right: 10px;">{female_pct}%</h2>
+  </div>
+
+  <!-- Силует жінки -->
+  <div>
+    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg" width="160"/>
+  </div>
+
+  <!-- Силует чоловіка -->
+  <div>
+    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg" width="160"/>
+  </div>
+
+  <!-- Правий підпис -->
+  <div style="text-align: left;">
+    <h2 style="color: blue; margin-left: 10px;">{male_pct}%</h2>
+  </div>
+
+</div>
+""", unsafe_allow_html=True)
 
 
 
