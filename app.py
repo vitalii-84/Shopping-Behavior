@@ -221,7 +221,6 @@ fig.tight_layout()
 st.pyplot(fig)
 
 
-
 # 📘 Легенда кольорів потоків
 st.markdown("""
 <style>
@@ -281,7 +280,13 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
     all_target = target_gc.tolist() + target_cs.tolist()
     all_value = value_gc.tolist() + value_cs.tolist()
 
-    all_color
+    # 🔹 Формування кольорів для потоків
+    all_color = []
+    for s, t in zip(all_source, all_target):
+        src_label = all_labels[s]
+        tgt_label = all_labels[t]
+
+
 
 
 # 🗺️ Сума покупок по штатах США
