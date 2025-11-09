@@ -225,18 +225,36 @@ st.pyplot(fig)
 
 # 🔀 Sankey Diagram: Gender → Category → Season
 st.subheader("🔀 Потік покупок: Gender → Category → Season")
+# 📘 Легенда кольорів потоків
 st.markdown("""
-Ця діаграма показує, як стать покупця впливає на вибір категорії товару, 
-а потім — на сезон покупки. Це допомагає виявити поведінкові патерни.
-""")
+<style>
+.legend-box {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.color-square {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    display: inline-block;
+    border: 1px solid #333;
+}
+</style>
 
-# 📘 Легенда кольорів
-st.markdown("""
-**🎨 Легенда кольорів:**
-- 🟦 Світло-голубий — **Найбільш помітні потоки**
-- 🟨 Світло-жовтий — **Сезонний зв’язок**
-- 🟥 Світло-червоний — **Несподівано малий потік**
-""")
+<div class="legend-box">
+  <span class="color-square" style="background-color: rgba(173,216,230,0.6);"></span>
+  <span>Світло-голубий — <b>Найбільш помітні потоки</b></span>
+</div>
+<div class="legend-box">
+  <span class="color-square" style="background-color: rgba(255,255,153,0.6);"></span>
+  <span>Світло-жовтий — <b>Сезонний зв’язок</b></span>
+</div>
+<div class="legend-box">
+  <span class="color-square" style="background-color: rgba(255,182,193,0.6);"></span>
+  <span>Світло-червоний — <b>Несподівано малий потік</b></span>
+</div>
+""", unsafe_allow_html=True)
 
 import plotly.graph_objects as go
 import colorsys
