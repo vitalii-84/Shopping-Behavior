@@ -312,7 +312,7 @@ st.markdown("""
 st.markdown("""
 **🎨 Легенда кольорів:**
 - 🟦 Світло-голубий — **Найбільш помітні потоки**
-- 🟨 Світло-жовтий — **Унісекс-покупки / сезонний зв’язок**
+- 🟨 Світло-жовтий — **Сезонний зв’язок**
 - 🟥 Світло-червоний — **Несподівано малий потік**
 """)
 
@@ -349,21 +349,19 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
         src_label = all_labels[s]
         tgt_label = all_labels[t]
 
-        # Світло-голубий
+        # Світло-голубий — найбільш помітні потоки
         if (src_label == "Female" and tgt_label == "Accessories") or \
            (src_label == "Accessories" and tgt_label == "Summer") or \
            (src_label == "Male" and tgt_label == "Clothing") or \
            (src_label == "Clothing" and tgt_label == "Fall"):
             all_color.append("rgba(173,216,230,0.6)")
 
-        # Світло-жовтий
-        elif (src_label in ["Male", "Female"] and tgt_label == "Footwear") or \
-             (src_label == "Footwear" and tgt_label == "Spring") or \
-             (src_label == "Accessories" and tgt_label == "Summer") or \
+        # Світло-жовтий — сезонний зв’язок
+        elif (src_label == "Accessories" and tgt_label == "Summer") or \
              (src_label == "Clothing" and tgt_label == "Winter"):
             all_color.append("rgba(255,255,153,0.6)")
 
-        # Світло-червоний
+        # Світло-червоний — несподівано малий потік
         elif (src_label == "Female" and tgt_label == "Footwear") or \
              (src_label == "Footwear" and tgt_label == "Spring" and "Female" in sankey_df["Gender"].unique()):
             all_color.append("rgba(255,182,193,0.6)")
@@ -419,8 +417,6 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
 
     # 🔹 Вивід у Streamlit
     st.plotly_chart(fig3, use_container_width=True)
-
-
 
 
 
