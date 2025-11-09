@@ -472,7 +472,11 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
     max_age = int(filtered_df["Age"].max())
 
     # 🔹 Формування вікових інтервалів
-    bins = [min_age, 24] + list(range(25, max_age + 6, 5))  # +6 щоб включити max_age
+    if min_age < 24:
+        bins = [min_age, 24] + list(range(25, max_age + 6, 5))
+    else:
+        bins = list(range(min_age, max_age + 6, 5))
+
     labels = [f"{bins[i]}–{bins[i+1]-1}" for i in range(len(bins)-1)]
 
     # 🔹 Створення вікових груп
@@ -537,4 +541,5 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
     )
 
     st.plotly_chart(fig_age, use_container_width=True)
+
 
