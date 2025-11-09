@@ -472,7 +472,7 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
     max_age = int(filtered_df["Age"].max())
 
     # 🔹 Формування вікових інтервалів
-    bins = [min_age, 24] + list(range(25, max_age + 6, 5))
+    bins = [min_age, 24] + list(range(25, max_age + 6, 5))  # +6 щоб включити max_age
     labels = [f"{bins[i]}–{bins[i+1]-1}" for i in range(len(bins)-1)]
 
     # 🔹 Створення вікових груп
@@ -480,19 +480,23 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
 
     # 🔹 Агрегація суми покупок
     age_group_sum = (
-        filtered_df.groupby("Age Group")["Purchase Amount (USD)"]
+        filtered_df.groupby("Age Group", observed=True)["Purchase Amount (USD)"]
         .sum()
         .round(2)
         .reset_index()
         .dropna()
     )
 
-    # 🔹 Сортування та визначення топ-3 і мінімальної групи
-    sorted_groups = age_group_sum.sort_values("Purchase Amount (USD)", ascending=False).reset_index(drop=True)
-    top1 = sorted_groups.loc[0, "Age Group"]
-    top2 = sorted_groups.loc[1, "Age Group"] if len(sorted_groups) > 1 else None
-    top3 = sorted_groups.loc[2, "Age Group"] if len(sorted_groups) > 2 else None
-    bottom = sorted_groups.loc[len(sorted_groups)-1, "Age Group"]
+    # 🔹 Сортування вікових груп по зростанню віку
+    age_group_sum["SortIndex"] = age_group_sum["Age Group"].apply(lambda x: int(str(x).split("–")[0]))
+    age_group_sum = age_group_sum.sort_values("SortIndex", ascending=True).drop(columns="SortIndex")
+
+    # 🔹 Визначення топ-3 і мінімальної групи
+    sorted_by_amount = age_group_sum.sort_values("Purchase Amount (USD)", ascending=False).reset_index(drop=True)
+    top1 = sorted_by_amount.loc[0, "Age Group"]
+    top2 = sorted_by_amount.loc[1, "Age Group"] if len(sorted_by_amount) > 1 else None
+    top3 = sorted_by_amount.loc[2, "Age Group"] if len(sorted_by_amount) > 2 else None
+    bottom = sorted_by_amount.loc[len(sorted_by_amount)-1, "Age Group"]
 
     # 🔹 Призначення кольорів
     def assign_color(group):
@@ -525,6 +529,7 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
     fig_age.update_layout(
         xaxis_title="Сума покупок (USD)",
         yaxis_title="Вікова група",
+        yaxis=dict(categoryorder="array", categoryarray=age_group_sum["Age Group"].tolist()),
         showlegend=False,
         font=dict(size=14),
         plot_bgcolor="white",
