@@ -221,6 +221,7 @@ fig.tight_layout()
 st.pyplot(fig)
 
 
+
 # 🔀 Sankey Diagram: Gender → Category → Season
 st.subheader("🔀 Потік покупок: Gender → Category → Season")
 st.markdown("""
@@ -297,6 +298,130 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
 
     # 🔹 Вивід у Streamlit
     st.plotly_chart(fig3, use_container_width=True)
+
+
+
+# 🔀 Sankey Diagram: Gender → Category → Season
+st.subheader("🔀 Потік покупок: Gender → Category → Season")
+st.markdown("""
+Ця діаграма показує, як стать покупця впливає на вибір категорії товару, 
+а потім — на сезон покупки. Це допомагає виявити поведінкові патерни.
+""")
+
+# 📘 Легенда кольорів
+st.markdown("""
+**🎨 Легенда кольорів:**
+- 🟦 Світло-голубий — **Найбільш помітні потоки**
+- 🟨 Світло-жовтий — **Унісекс-покупки / сезонний зв’язок**
+- 🟥 Світло-червоний — **Несподівано малий потік**
+""")
+
+import plotly.graph_objects as go
+import colorsys
+import pandas as pd
+
+if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
+    # 🔹 Групування даних
+    sankey_df = filtered_df.groupby(["Gender", "Category", "Season"]).size().reset_index(name="count")
+
+    # 🔹 Унікальні мітки для вузлів
+    all_labels = pd.concat([sankey_df["Gender"], sankey_df["Category"], sankey_df["Season"]]).unique().tolist()
+    label_to_index = {label: i for i, label in enumerate(all_labels)}
+
+    # 🔹 Потоки: Gender → Category
+    source_gc = sankey_df["Gender"].map(label_to_index)
+    target_gc = sankey_df["Category"].map(label_to_index)
+    value_gc = sankey_df["count"]
+
+    # 🔹 Потоки: Category → Season
+    source_cs = sankey_df["Category"].map(label_to_index)
+    target_cs = sankey_df["Season"].map(label_to_index)
+    value_cs = sankey_df["count"]
+
+    # 🔹 Об'єднання всіх потоків
+    all_source = source_gc.tolist() + source_cs.tolist()
+    all_target = target_gc.tolist() + target_cs.tolist()
+    all_value = value_gc.tolist() + value_cs.tolist()
+
+    # 🔹 Індивідуальне призначення кольорів для потоків
+    all_color = []
+    for s, t in zip(all_source, all_target):
+        src_label = all_labels[s]
+        tgt_label = all_labels[t]
+
+        # Світло-голубий
+        if (src_label == "Female" and tgt_label == "Accessories") or \
+           (src_label == "Accessories" and tgt_label == "Summer") or \
+           (src_label == "Male" and tgt_label == "Clothing") or \
+           (src_label == "Clothing" and tgt_label == "Fall"):
+            all_color.append("rgba(173,216,230,0.6)")
+
+        # Світло-жовтий
+        elif (src_label in ["Male", "Female"] and tgt_label == "Footwear") or \
+             (src_label == "Footwear" and tgt_label == "Spring") or \
+             (src_label == "Accessories" and tgt_label == "Summer") or \
+             (src_label == "Clothing" and tgt_label == "Winter"):
+            all_color.append("rgba(255,255,153,0.6)")
+
+        # Світло-червоний
+        elif (src_label == "Female" and tgt_label == "Footwear") or \
+             (src_label == "Footwear" and tgt_label == "Spring" and "Female" in sankey_df["Gender"].unique()):
+            all_color.append("rgba(255,182,193,0.6)")
+
+        # Інші — напівпрозорі
+        else:
+            all_color.append("rgba(150,150,150,0.3)")
+
+    # 🔹 Генерація кольорів вузлів
+    def generate_colors(n):
+        hues = [i / n for i in range(n)]
+        return [
+            f"rgba({int(r*255)}, {int(g*255)}, {int(b*255)}, 0.9)"
+            for h in hues
+            for r, g, b in [colorsys.hsv_to_rgb(h, 0.5, 0.9)]
+        ][:n]
+
+    node_colors = generate_colors(len(all_labels))
+
+    # 🔹 Побудова Sankey Diagram
+    fig3 = go.Figure(data=[go.Sankey(
+        node=dict(
+            pad=20,
+            thickness=25,
+            line=dict(color="black", width=0.8),
+            label=all_labels,
+            color=node_colors,
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=14,
+                font_color="black"
+            )
+        ),
+        link=dict(
+            source=all_source,
+            target=all_target,
+            value=all_value,
+            color=all_color
+        )
+    )])
+
+    # 🔹 Стиль діаграми
+    fig3.update_layout(
+        title=dict(
+            text="Sankey Diagram: Gender → Category → Season",
+            font=dict(size=18, color="black"),
+            x=0.5
+        ),
+        font=dict(color="black", size=15),
+        plot_bgcolor="white",
+        paper_bgcolor="white"
+    )
+
+    # 🔹 Вивід у Streamlit
+    st.plotly_chart(fig3, use_container_width=True)
+
+
+
 
 
 
