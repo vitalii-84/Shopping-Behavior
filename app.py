@@ -106,6 +106,30 @@ st.dataframe(pd.DataFrame({
     "Відсоток": category_pct.values
 }))
 
+# 🌳 TreeMap: Покупки по категоріях
+st.subheader("🌳 Покупки по категоріях (TreeMap)")
+st.markdown("""
+Ця візуалізація показує розподіл покупок по категоріях у вигляді прямокутників, 
+де площа кожного елемента відповідає кількості покупок. Це дозволяє швидко 
+оцінити масштаб кожної категорії.
+""")
+
+# 🔹 Підготовка даних
+category_counts = filtered_df["Category"].value_counts().reset_index()
+category_counts.columns = ["Category", "Count"]
+
+# 🔹 Побудова TreeMap
+fig_tree = px.treemap(
+    category_counts,
+    path=["Category"],
+    values="Count",
+    color="Count",
+    color_continuous_scale="Blues",
+    title="TreeMap: Покупки по категоріях",
+)
+
+# 🔹 Вивід у Streamlit
+st.plotly_chart(fig_tree, use_container_width=True)
 
 
 
