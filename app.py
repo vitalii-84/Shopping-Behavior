@@ -118,6 +118,42 @@ st.image("https://copilot.microsoft.com/th/id/BCO.9024033d-b6f3-40b6-a487-48c5b3
 
 
 
+# 👥 Візуалізація розподілу статі з силуетами
+st.subheader("👥 Розподіл статі")
+st.markdown("""
+Ця візуалізація показує співвідношення між чоловіками та жінками серед покупців 
+у більш емоційній формі — через силуети. Це дозволяє краще сприймати дані 
+і створює візуальний зв’язок із аудиторією.
+""")
+
+# 🔹 Підрахунок відсотків
+gender_counts = filtered_df["Gender"].value_counts(normalize=True) * 100
+female_pct = round(gender_counts.get("Female", 0), 1)
+male_pct = round(gender_counts.get("Male", 0), 1)
+
+# 🔹 Вивід зображень з GitHub
+col1, col2 = st.columns(2)
+
+with col1:
+    st.image(
+        "https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg",
+        caption=f"{female_pct}% Жінки",
+        use_column_width=True
+    )
+
+with col2:
+    st.image(
+        "https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg",
+        caption=f"{male_pct}% Чоловіки",
+        use_column_width=True
+    )
+
+
+
+
+
+
+
 
 # 🔥 Теплова карта взаємозв’язків (підтримує і категоріальні, і числові змінні)
 st.subheader("📊 Теплова карта взаємозв’язків між змінними")
