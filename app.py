@@ -452,3 +452,62 @@ fig_map.update_layout(
 
 # 🔹 Вивід у Streamlit
 st.plotly_chart(fig_map, use_container_width=True)
+
+
+
+# 📊 Аналіз покупок за віковими групами
+st.subheader("📊 Покупки за віковими групами")
+st.markdown("""
+Ця візуалізація показує, які вікові групи витрачають найбільше онлайн. 
+Групи сформовані з кроком у 5 років.
+""")
+
+import pandas as pd
+import plotly.express as px
+
+if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
+    # 🔹 Створення вікових груп
+    age_bins = list(range(15, 75, 5))  # від 15 до 70 включно
+    age_labels = [f"{i}-{i+4}" for i in age_bins[:-1]]
+    filtered_df["Age Group"] = pd.cut(filtered_df["Age"], bins=age_bins, labels=age_labels, right=False)
+
+    # 🔹 Агрегація суми покупок
+    age_group_sum = (
+        filtered_df.groupby("Age Group")["Purchase Amount (USD)"]
+        .sum()
+        .round(2)
+        .reset_index()
+        .dropna()
+    )
+
+    # 🔹 Визначення найактивнішої групи
+    max_group = age_group_sum.loc[age_group_sum["Purchase Amount (USD)"].idxmax(), "Age Group"]
+
+    # 🔹 Додавання кольору
+    age_group_sum["Color"] = age_group_sum["Age Group"].apply(
+        lambda x: "darkblue" if x == max_group else "lightgray"
+    )
+
+    # 🔹 Побудова графіка
+    fig_age = px.bar(
+        age_group_sum,
+        x="Purchase Amount (USD)",
+        y="Age Group",
+        orientation="h",
+        color="Color",
+        color_discrete_map="identity",
+        text="Purchase Amount (USD)",
+        title="Загальна сума покупок за віковими групами"
+    )
+
+    fig_age.update_traces(textposition="outside")
+    fig_age.update_layout(
+        xaxis_title="Сума покупок (USD)",
+        yaxis_title="Вікова група",
+        showlegend=False,
+        font=dict(size=14),
+        plot_bgcolor="white",
+        paper_bgcolor="white"
+    )
+
+    st.plotly_chart(fig_age, use_container_width=True)
