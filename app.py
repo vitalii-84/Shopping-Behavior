@@ -454,12 +454,11 @@ fig_map.update_layout(
 st.plotly_chart(fig_map, use_container_width=True)
 
 
-
 # 📊 Аналіз покупок за віковими групами
 st.subheader("📊 Покупки за віковими групами")
 st.markdown("""
 Ця візуалізація показує, які вікові групи витрачають найбільше онлайн. 
-Перша група охоплює наймолодших покупців до 23 років, далі — інтервали по 5 років.
+Групи сформовані з кроком у 5 років, починаючи з 18 років.
 Три найактивніші групи виділені різними відтінками синього, найменш активна — червоним.
 """)
 
@@ -467,16 +466,12 @@ import pandas as pd
 import plotly.express as px
 
 if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
-    # 🔹 Визначення меж
-    min_age = int(filtered_df["Age"].min())
+    # 🔹 Встановлення меж
+    min_age = 18
     max_age = int(filtered_df["Age"].max())
 
-    # 🔹 Формування вікових інтервалів
-    if min_age < 24:
-        bins = [min_age, 24] + list(range(25, max_age + 6, 5))
-    else:
-        bins = list(range(min_age, max_age + 6, 5))
-
+    # 🔹 Формування інтервалів з кроком 5 років
+    bins = list(range(min_age, max_age + 6, 5))  # +6 щоб включити max_age
     labels = [f"{bins[i]}–{bins[i+1]-1}" for i in range(len(bins)-1)]
 
     # 🔹 Створення вікових груп
@@ -491,7 +486,7 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
         .dropna()
     )
 
-    # 🔹 Сортування вікових груп по зростанню віку
+    # 🔹 Сортування вікових груп по зростанню
     age_group_sum["SortIndex"] = age_group_sum["Age Group"].apply(lambda x: int(str(x).split("–")[0]))
     age_group_sum = age_group_sum.sort_values("SortIndex", ascending=True).drop(columns="SortIndex")
 
@@ -541,5 +536,4 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
     )
 
     st.plotly_chart(fig_age, use_container_width=True)
-
 
