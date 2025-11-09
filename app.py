@@ -85,60 +85,7 @@ st.markdown("""
 """)
 st.bar_chart(filtered_df["Category"].value_counts())
 
-# 🧁 Кругова діаграма по статі
-st.subheader("👥 Розподіл статі")
-st.markdown("""
-Ця діаграма демонструє співвідношення між чоловіками та жінками серед покупців. 
-Це дозволяє краще таргетувати маркетингові кампанії.
-""")
-fig1, ax1 = plt.subplots(figsize=(8, 4))  # 👈 ширина екрана
-ax1.pie(filtered_df["Gender"].value_counts(), labels=filtered_df["Gender"].value_counts().index, autopct="%1.1f%%", startangle=90)
-ax1.axis("equal")
-fig1.tight_layout()  # 👈 адаптація до контейнера
-st.pyplot(fig1)
-
-
-
-# 👥 Візуалізація розподілу статі з силуетами
-st.subheader("👥 Розподіл статі")
-st.markdown("""
-Ця візуалізація показує співвідношення між чоловіками та жінками серед покупців 
-у більш емоційній формі — через силуети. Це дозволяє краще сприймати дані 
-і створює візуальний зв’язок із аудиторією.
-""")
-
-# 🔹 Підрахунок відсотків
-gender_counts = filtered_df["Gender"].value_counts(normalize=True) * 100
-female_pct = round(gender_counts.get("Female", 0), 1)
-male_pct = round(gender_counts.get("Male", 0), 1)
-
-# 🔹 Вивід силуетного зображення
-st.image("https://copilot.microsoft.com/th/id/BCO.9024033d-b6f3-40b6-a487-48c5b37025c5.png", caption=f"Жінки: {female_pct}% | Чоловіки: {male_pct}%", use_column_width=True)
-
-
-
-
-# 👥 Візуалізація розподілу статі з силуетами
-st.subheader("👥 Розподіл статі")
-st.markdown("""
-Ця візуалізація показує співвідношення між чоловіками та жінками серед покупців 
-у більш емоційній формі — через силуети. Це дозволяє краще сприймати дані 
-і створює візуальний зв’язок із аудиторією.
-""")
-
-# 🔹 Підрахунок відсотків
-gender_counts = filtered_df["Gender"].value_counts(normalize=True) * 100
-female_pct = round(gender_counts.get("Female", 0), 1)
-male_pct = round(gender_counts.get("Male", 0), 1)
-
-# 🔹 Вивід зображень з однаковим розміром і вирівняними підписами
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown(f"<div style='text-align: center;'><img src='https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg' width='160'/><h3>{female_pct}%</h3></div>", unsafe_allow_html=True)
-
-with col2:
-    st.markdown(f"<div style='text-align: center;'><img src='https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg' width='160'/><h3>{male_pct}%</h3></div>", unsafe_allow_html=True)
+gn: center;'><img src='https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg' width='160'/><h3>{male_pct}%</h3></div>", unsafe_allow_html=True)
 
 
 # 👥 Візуалізація розподілу статі з силуетами
