@@ -85,44 +85,26 @@ st.markdown("""
 """)
 st.bar_chart(filtered_df["Category"].value_counts())
 
-# 📊 Бар-графік по категоріях з підписами
+# 📊 Покупки по категоріях
 st.subheader("🛒 Покупки по категоріях")
 st.markdown("""
 Цей графік показує, які категорії товарів найчастіше купують користувачі. 
 Найпопулярніші — одяг та аксесуари. Це може свідчити про сезонні тренди або переваги певних груп покупців.
 """)
 
-# 🔹 Підготовка даних
+# 🔹 Графік
+st.bar_chart(filtered_df["Category"].value_counts())
+
+# 🔹 Таблиця з відсотками
 category_counts = filtered_df["Category"].value_counts()
-category_pct = (category_counts / category_counts.sum()) * 100
+category_pct = (category_counts / category_counts.sum() * 100).round(1).astype(str) + "%"
 
-# 🔹 Побудова графіка
-fig, ax = plt.subplots(figsize=(10, 5))
-bars = ax.bar(category_counts.index, category_counts.values, color="skyblue")
-
-# 🔹 Додавання підписів у відсотках
-for bar, pct in zip(bars, category_pct):
-    height = bar.get_height()
-    ax.text(
-        bar.get_x() + bar.get_width() / 2,
-        height,
-        f"{pct:.1f}%",
-        ha="center",
-        va="bottom",
-        fontsize=10,
-        color="black"
-    )
-
-# 🔹 Оформлення
-ax.set_ylabel("Кількість покупок")
-ax.set_xlabel("Категорія")
-ax.set_title("Розподіл покупок по категоріях")
-plt.xticks(rotation=45)
-fig.tight_layout()
-
-# 🔹 Вивід у Streamlit
-st.pyplot(fig)
-
+st.markdown("### 📌 Відсотковий розподіл по категоріях")
+st.dataframe(pd.DataFrame({
+    "Категорія": category_counts.index,
+    "Кількість": category_counts.values,
+    "Відсоток": category_pct.values
+}))
 
 
 
