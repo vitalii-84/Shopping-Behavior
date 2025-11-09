@@ -459,17 +459,23 @@ st.plotly_chart(fig_map, use_container_width=True)
 st.subheader("📊 Покупки за віковими групами")
 st.markdown("""
 Ця візуалізація показує, які вікові групи витрачають найбільше онлайн. 
-Групи сформовані з кроком у 5 років.
+Перша група охоплює наймолодших покупців до 23 років, далі — інтервали по 5 років.
 """)
 
 import pandas as pd
 import plotly.express as px
 
 if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
+    # 🔹 Визначення меж
+    min_age = int(filtered_df["Age"].min())
+    max_age = int(filtered_df["Age"].max())
+
+    # 🔹 Формування вікових інтервалів
+    bins = [min_age, 24] + list(range(25, max_age + 6, 5))  # +6 щоб включити max_age
+    labels = [f"{bins[i]}–{bins[i+1]-1}" for i in range(len(bins)-1)]
+
     # 🔹 Створення вікових груп
-    age_bins = list(range(15, 75, 5))  # від 15 до 70 включно
-    age_labels = [f"{i}-{i+4}" for i in age_bins[:-1]]
-    filtered_df["Age Group"] = pd.cut(filtered_df["Age"], bins=age_bins, labels=age_labels, right=False)
+    filtered_df["Age Group"] = pd.cut(filtered_df["Age"], bins=bins, labels=labels, right=False)
 
     # 🔹 Агрегація суми покупок
     age_group_sum = (
@@ -511,3 +517,4 @@ if all(col in filtered_df.columns for col in ["Age", "Purchase Amount (USD)"]):
     )
 
     st.plotly_chart(fig_age, use_container_width=True)
+
