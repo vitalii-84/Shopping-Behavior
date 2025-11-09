@@ -85,8 +85,6 @@ st.markdown("""
 """)
 st.bar_chart(filtered_df["Category"].value_counts())
 
-gn: center;'><img src='https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg' width='160'/><h3>{male_pct}%</h3></div>", unsafe_allow_html=True)
-
 
 # 👥 Візуалізація розподілу статі з силуетами
 st.subheader("👥 Розподіл статі")
