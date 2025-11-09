@@ -110,12 +110,12 @@ st.markdown(f"""
 
   <!-- Силует жінки -->
   <div>
-    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg" width="160"/>
+    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/woman3.jpg" width="200"/>
   </div>
 
   <!-- Силует чоловіка -->
   <div>
-    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg" width="160"/>
+    <img src="https://raw.githubusercontent.com/vitalii-84/Shopping-Behavior/main/man3.jpg" width="200"/>
   </div>
 
   <!-- Правий підпис -->
