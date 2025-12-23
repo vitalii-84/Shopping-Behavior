@@ -367,6 +367,119 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
 
 
 
+st.subheader("🧍‍♂️🧍‍♀️ Gender Analysis: Purchased Items")
+
+# === НАЛАШТУВАННЯ КОРИСТУВАЧА ===
+
+# Перемикач метрики аналізу
+metric = st.radio(
+    "Оберіть метрику для аналізу:",
+    ("Кількість покупок", "Сума покупок (USD)"),
+    horizontal=True
+)
+
+# Кількість товарів для TOP / BOTTOM
+TOP_N = st.slider(
+    "Оберіть кількість товарів (Top / Bottom)",
+    min_value=3,
+    max_value=10,
+    value=5
+)
+
+# === ПІДГОТОВКА ДАНИХ ===
+
+if metric == "Кількість покупок":
+    # Рахуємо кількість покупок
+    grouped = (
+        df.groupby(["Gender", "Item Purchased"])
+          .size()
+          .reset_index(name="Value")
+    )
+    value_label = "Number of Purchases"
+
+else:
+    # Сумарна вартість покупок
+    grouped = (
+        df.groupby(["Gender", "Item Purchased"])["Purchase Amount (USD)"]
+          .sum()
+          .reset_index(name="Value")
+    )
+    value_label = "Total Purchase Amount (USD)"
+
+# Загальне значення по товарах (без поділу на стать)
+total_by_item = (
+    grouped
+    .groupby("Item Purchased")["Value"]
+    .sum()
+    .sort_values(ascending=False)
+)
+
+# TOP та BOTTOM товари
+top_items = total_by_item.head(TOP_N).index
+bottom_items = total_by_item.tail(TOP_N).index
+
+top_data = grouped[grouped["Item Purchased"].isin(top_items)]
+bottom_data = grouped[grouped["Item Purchased"].isin(bottom_items)]
+
+# === ВІЗУАЛІЗАЦІЯ: TOP ===
+
+fig_top = px.bar(
+    top_data,
+    x="Item Purchased",
+    y="Value",
+    color="Gender",
+    barmode="group",
+    title=f"Top {TOP_N} товарів за показником: {metric}",
+    labels={
+        "Value": value_label,
+        "Item Purchased": "Товар",
+        "Gender": "Стать"
+    }
+)
+
+fig_top.update_layout(
+    xaxis_tickangle=-45,
+    template="plotly_white"
+)
+
+st.plotly_chart(fig_top, use_container_width=True)
+
+# === ВІЗУАЛІЗАЦІЯ: BOTTOM ===
+
+fig_bottom = px.bar(
+    bottom_data,
+    x="Item Purchased",
+    y="Value",
+    color="Gender",
+    barmode="group",
+    title=f"Bottom {TOP_N} товарів за показником: {metric}",
+    labels={
+        "Value": value_label,
+        "Item Purchased": "Товар",
+        "Gender": "Стать"
+    }
+)
+
+fig_bottom.update_layout(
+    xaxis_tickangle=-45,
+    template="plotly_white"
+)
+
+st.plotly_chart(fig_bottom, use_container_width=True)
+
+# === АНАЛІТИЧНИЙ ВИСНОВОК ===
+
+st.info("""
+📌 **Key Insights**
+
+- Перемикач дозволяє аналізувати як **популярність товарів**, так і **фінансовий внесок**
+- TOP-графік показує ключові товари для кожної статі
+- BOTTOM-графік допомагає знайти малоефективні позиції асортименту
+- Видно гендерні відмінності у виборі товарів та рівні витрат
+""")
+
+
+
 # 🗺️ Сума покупок по штатах США
 st.subheader("🗺️ Сума покупок по штатах США")
 st.markdown("""
