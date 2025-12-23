@@ -367,18 +367,21 @@ if all(col in filtered_df.columns for col in ["Gender", "Category", "Season"]):
 
 
 
+import streamlit as st
+import plotly.express as px
+
 st.subheader("🧍‍♂️🧍‍♀️ Gender Analysis: Purchased Items")
 
-# === НАЛАШТУВАННЯ КОРИСТУВАЧА ===
+# ==============================
+# НАЛАШТУВАННЯ КОРИСТУВАЧА
+# ==============================
 
-# Перемикач метрики аналізу
 metric = st.radio(
     "Оберіть метрику для аналізу:",
     ("Кількість покупок", "Сума покупок (USD)"),
     horizontal=True
 )
 
-# Кількість товарів для TOP / BOTTOM
 TOP_N = st.slider(
     "Оберіть кількість товарів (Top / Bottom)",
     min_value=3,
@@ -386,19 +389,18 @@ TOP_N = st.slider(
     value=5
 )
 
-# === ПІДГОТОВКА ДАНИХ ===
+# ==============================
+# ПІДГОТОВКА ДАНИХ
+# ==============================
 
 if metric == "Кількість покупок":
-    # Рахуємо кількість покупок
     grouped = (
         df.groupby(["Gender", "Item Purchased"])
           .size()
           .reset_index(name="Value")
     )
     value_label = "Number of Purchases"
-
 else:
-    # Сумарна вартість покупок
     grouped = (
         df.groupby(["Gender", "Item Purchased"])["Purchase Amount (USD)"]
           .sum()
@@ -406,7 +408,7 @@ else:
     )
     value_label = "Total Purchase Amount (USD)"
 
-# Загальне значення по товарах (без поділу на стать)
+# Загальне значення по кожному товару (для сортування)
 total_by_item = (
     grouped
     .groupby("Item Purchased")["Value"]
@@ -414,14 +416,16 @@ total_by_item = (
     .sort_values(ascending=False)
 )
 
-# TOP та BOTTOM товари
-top_items = total_by_item.head(TOP_N).index
-bottom_items = total_by_item.tail(TOP_N).index
+# TOP і BOTTOM списки товарів
+top_items = total_by_item.head(TOP_N)
+bottom_items = total_by_item.tail(TOP_N)
 
-top_data = grouped[grouped["Item Purchased"].isin(top_items)]
-bottom_data = grouped[grouped["Item Purchased"].isin(bottom_items)]
+top_data = grouped[grouped["Item Purchased"].isin(top_items.index)]
+bottom_data = grouped[grouped["Item Purchased"].isin(bottom_items.index)]
 
-# === ВІЗУАЛІЗАЦІЯ: TOP ===
+# ==============================
+# ВІЗУАЛІЗАЦІЯ: TOP (↓ спадання)
+# ==============================
 
 fig_top = px.bar(
     top_data,
@@ -437,14 +441,21 @@ fig_top = px.bar(
     }
 )
 
+# Сортування осі X від більшого до меншого
 fig_top.update_layout(
+    xaxis=dict(
+        categoryorder="array",
+        categoryarray=top_items.index.tolist()
+    ),
     xaxis_tickangle=-45,
     template="plotly_white"
 )
 
 st.plotly_chart(fig_top, use_container_width=True)
 
-# === ВІЗУАЛІЗАЦІЯ: BOTTOM ===
+# ==============================
+# ВІЗУАЛІЗАЦІЯ: BOTTOM (↑ зростання)
+# ==============================
 
 fig_bottom = px.bar(
     bottom_data,
@@ -460,23 +471,31 @@ fig_bottom = px.bar(
     }
 )
 
+# Сортування осі X від меншого до більшого
 fig_bottom.update_layout(
+    xaxis=dict(
+        categoryorder="array",
+        categoryarray=bottom_items.sort_values().index.tolist()
+    ),
     xaxis_tickangle=-45,
     template="plotly_white"
 )
 
 st.plotly_chart(fig_bottom, use_container_width=True)
 
-# === АНАЛІТИЧНИЙ ВИСНОВОК ===
+# ==============================
+# АНАЛІТИЧНИЙ ВИСНОВОК
+# ==============================
 
 st.info("""
 📌 **Key Insights**
 
-- Перемикач дозволяє аналізувати як **популярність товарів**, так і **фінансовий внесок**
-- TOP-графік показує ключові товари для кожної статі
-- BOTTOM-графік допомагає знайти малоефективні позиції асортименту
-- Видно гендерні відмінності у виборі товарів та рівні витрат
+- TOP-графік автоматично відсортований від найбільш значущих товарів до менш значущих
+- BOTTOM-графік показує найменш популярні або найменш прибуткові позиції
+- Сортування оновлюється динамічно при зміні метрики або кількості товарів
+- Такий підхід покращує читабельність та аналітичну інтерпретацію
 """)
+
 
 
 
