@@ -510,7 +510,72 @@ st.info("""
   – сезонності або неправильного позиціонування.
 - Отримані інсайти можуть бути використані для оптимізації асортименту та підвищення середнього чеку.
 """)
+---
 
+# 🔥 Heatmap: Gender × Item Purchased
+st.subheader("🔥 Теплова карта: Стать × Товар")
+st.markdown("""
+Ця теплова карта показує, які товари частіше купують чоловіки та жінки.
+Інтенсивність кольору відображає або **кількість покупок**, або **загальну суму покупок**.
+""")
+
+# 🔘 Перемикач метрики
+heatmap_metric = st.radio(
+    "Оберіть метрику для теплової карти:",
+    ["Кількість покупок", "Сума покупок (USD)"],
+    horizontal=True
+)
+
+# 🔹 Агрегація даних
+if heatmap_metric == "Кількість покупок":
+    heatmap_df = (
+        filtered_df
+        .groupby(["Item Purchased", "Gender"])
+        .size()
+        .reset_index(name="Value")
+    )
+    value_label = "Кількість покупок"
+else:
+    heatmap_df = (
+        filtered_df
+        .groupby(["Item Purchased", "Gender"])["Purchase Amount (USD)"]
+        .sum()
+        .reset_index(name="Value")
+    )
+    value_label = "Сума покупок (USD)"
+
+# 🔹 Pivot-таблиця
+heatmap_pivot = heatmap_df.pivot(
+    index="Item Purchased",
+    columns="Gender",
+    values="Value"
+).fillna(0)
+
+# 🔹 Сортування товарів за загальним внеском
+heatmap_pivot["Total"] = heatmap_pivot.sum(axis=1)
+heatmap_pivot = heatmap_pivot.sort_values("Total", ascending=False).drop(columns="Total")
+
+# 🔹 Побудова heatmap
+fig, ax = plt.subplots(figsize=(6, max(6, len(heatmap_pivot) * 0.4)))
+
+sns.heatmap(
+    heatmap_pivot,
+    annot=True,
+    fmt=".0f",
+    cmap="YlOrRd",
+    linewidths=0.5,
+    cbar_kws={"label": value_label},
+    ax=ax
+)
+
+ax.set_title("Heatmap: Стать × Товар", fontsize=14)
+ax.set_xlabel("Стать")
+ax.set_ylabel("Товар")
+
+plt.tight_layout()
+st.pyplot(fig)
+
+---
 
 
 
